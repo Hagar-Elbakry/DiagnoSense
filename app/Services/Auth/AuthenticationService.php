@@ -77,6 +77,15 @@ class AuthenticationService
         return $token;
     }
 
+    public function resetPassword(User $user, string $password) : void
+    {
+        $user->update([
+            'password' => $password
+        ]);
+
+        $user->tokens()->delete();
+    }
+
     private function authenticate(string $contact, string $password): ?User
     {
         $user = $this->getUser($contact);

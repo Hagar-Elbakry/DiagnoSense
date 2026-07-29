@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgetPasswordRequest;
 use App\Services\Auth\AuthenticationService;
 use App\Helpers\ApiResponse;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 use Exception;
 
 class PasswordController extends Controller {
@@ -16,7 +18,7 @@ class PasswordController extends Controller {
         protected AuthenticationService $authenticationService
     ){}
 
-    public function forgetPassword(ForgetPasswordRequest $request, string $type) 
+    public function forgetPassword(ForgetPasswordRequest $request, string $type): JsonResponse
     {
         try {
             $data = $request->validated();
@@ -30,7 +32,7 @@ class PasswordController extends Controller {
         }
     }
 
-    public function verifyOtp(VerifyOtpRequest $request, string $type) 
+    public function verifyOtp(VerifyOtpRequest $request, string $type): JsonResponse
     {
         try {
             $data = $request->validated();
@@ -54,6 +56,21 @@ class PasswordController extends Controller {
                 message: 'An unexpected error occurred. Please try again later.',
                 status: 500
             );
+        }
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        try{
+            $user = $request->user();
+            $data = $request->validated();
+
+            $this->authenticationService->resetPassword($user, $data['password']);
+            return ApiResponse::success(message: 'Your password has been reset');
+        }catch(Exception $e) {
+            Log::error('Password Reset Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Failed to reset password.', status: 500);
         }
     }
 }
