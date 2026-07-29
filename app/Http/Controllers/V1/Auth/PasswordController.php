@@ -22,7 +22,7 @@ class PasswordController extends Controller {
     {
         try {
             $data = $request->validated();
-            $this->authenticationService->forgotPassword($data);
+            $this->authenticationService->forgetPassword($data);
 
             return ApiResponse::success(message: 'OTP has been sent to your registered contact.');
         } catch (Exception $e) {

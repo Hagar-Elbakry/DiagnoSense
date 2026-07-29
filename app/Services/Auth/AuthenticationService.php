@@ -53,7 +53,7 @@ class AuthenticationService
         $user->currentAccessToken()->delete();
     }
 
-    public function forgotPassword(array $data): void
+    public function forgetPassword(array $data): void
     {
         $user = $this->getUser($data['contact']);
 
