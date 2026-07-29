@@ -2,6 +2,9 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Doctor;
+use App\Models\Patient;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +47,29 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function createUserWithType(string $type, string $contact, ?string $name = null): User
 {
-    // ..
+    $user = User::factory()->create([
+        'type' => $type,
+        'contact' => $contact,
+        'name' => $name ?? fake()->name(),
+    ]);
+
+    if ($type === 'doctor') {
+        Doctor::factory()->create([
+            'user_id' => $user->id,
+        ]);
+    } else {
+        Patient::factory()->create([
+            'user_id' => $user->id,
+        ]);
+    }
+
+    return $user;
+}
+
+
+function getDataSets(string $userType, $test): array
+{
+    return array_values($test->validData[$userType]);
 }
