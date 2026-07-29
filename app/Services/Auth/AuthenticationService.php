@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Helpers\Auth;
 use App\Events\User\UserRegistered;
 use Ichtrojan\Otp\Otp;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticationService
 {
@@ -13,7 +14,7 @@ class AuthenticationService
         protected Otp $otp
     ) {}
 
-      public function register(array $data): array
+    public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
             $user = User::create($data);
@@ -27,5 +28,38 @@ class AuthenticationService
 
             return compact('user', 'token', 'userId');
         });
+    }
+
+    public function login(array $data, string $type): ?array
+    {
+        $user = $this->authenticate($data['contact'], $data['password']);
+        if (! $user || $user->type !== $type) {
+            return null;
+        }
+
+        $token = Auth::getToken($user);
+        $userId = $type == 'doctor' ? $user->doctor->id : $user->patient->id;
+
+        return compact('user', 'token', 'userId');
+    }
+
+    public function logout(User $user): void
+    {
+        $user->currentAccessToken()->delete();
+    }
+
+    private function authenticate(string $contact, string $password): ?User
+    {
+        $user = $this->getUser($contact);
+        if (! $user || ! Hash::check($password, $user->password)) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    private function getUser(string $contact): ?User
+    {
+        return User::where('contact', $contact)->first();
     }
 }
