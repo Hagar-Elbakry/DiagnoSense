@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Doctor;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'contact', 'password', 'type', 'is_active', 'contact_verified_at', 'fcm_token'])]
 #[Hidden(['password', 'remember_token'])]
@@ -35,5 +36,10 @@ class User extends Authenticatable
      public function doctor(): HasOne
     {
         return $this->hasOne(Doctor::class);
+    }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(UserSocialAccount::class);
     }
 }
