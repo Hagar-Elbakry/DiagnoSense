@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function (){
 
             Route::controller(PasswordController::class)->as('password.')->group(function () {
                 Route::post('/forget-password/{type}', 'forgotPassword')->name('forgot');
+                Route::post('/verify-otp/{type}', 'verifyOtp')->name('verify');
             });
         });
     });
