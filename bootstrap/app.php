@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(ForceJsonResponse::class);
 
         $middleware->alias([
-            'check.user.type' => CheckUserType::class,
+            'check-user-type' => CheckUserType::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
