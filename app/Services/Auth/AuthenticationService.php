@@ -62,6 +62,21 @@ class AuthenticationService
         $this->sendOtp($user, $otpCode, isPasswordReset: true);
     }
 
+    public function verifyOtp(array $data): ?string
+    {
+        $user = $this->getUser($data['contact']);
+
+        $result = $this->otp->validate($user->contact, $data['otp']);
+        if (!$result->status) {
+            return null;
+        }
+
+        $token = $user->createToken('password_reset_'.$user->id, ['reset-password'],
+            now()->addMinutes(15))->plainTextToken;
+
+        return $token;
+    }
+
     private function authenticate(string $contact, string $password): ?User
     {
         $user = $this->getUser($contact);
