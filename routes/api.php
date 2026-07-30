@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\V1\Auth\AuthenticationController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
 use App\Http\Controllers\V1\Auth\PasswordController;
+use App\Http\Controllers\V1\Auth\ContactVerificationController;
 
 Route::prefix('v1')->group(function (){
     Route::prefix('auth')->group(function () {
@@ -23,6 +24,13 @@ Route::prefix('v1')->group(function (){
                 Route::post('/forget-password/{type}', 'forgetPassword')->name('forget');
                 Route::post('/verify-otp/{type}', 'verifyOtp')->name('verify');
                 Route::post('/reset-password/{type}', 'resetPassword')->name('reset')->middleware(['auth:sanctum', 'abilities:reset-password']);
+            });
+        });
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::controller(ContactVerificationController::class)->group(function () {
+                Route::post('/verify-contact','verifyContact')->name('verify-contact');
+                Route::get('/resend-otp', 'resendOtp')->name('resend-otp');
             });
         });
     });
