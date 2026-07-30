@@ -30,7 +30,7 @@ Route::prefix('v1')->group(function (){
         Route::middleware('auth:sanctum')->group(function () {
             Route::controller(ContactVerificationController::class)->group(function () {
                 Route::post('/verify-contact','verifyContact')->name('verify-contact');
-                Route::get('/resend-otp', 'resendOtp')->name('resend-otp');
+                Route::post('/resend-otp', 'resendOtp')->name('resend-otp');
             });
         });
     });
