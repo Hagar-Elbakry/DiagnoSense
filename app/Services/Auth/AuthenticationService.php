@@ -66,8 +66,7 @@ class AuthenticationService
     {
         $user = $this->getUser($data['contact']);
 
-        $result = $this->otp->validate($user->contact, $data['otp']);
-        if (!$result->status) {
+        if (!$this->validateOtp($user->contact, $data['otp'])) {
             return null;
         }
 
@@ -85,6 +84,37 @@ class AuthenticationService
 
         $user->tokens()->delete();
     }
+
+    public function verifyContact(array $data, User $user): bool
+    {
+        return DB::transaction(function () use ($data, $user) {
+
+
+            if (! $this->validateOtp($user->contact, $data['otp'])) {
+                return false;
+            }
+
+            $user->update([
+                'contact_verified_at' => now(),
+            ]);
+
+            return true;
+        });
+    }
+
+    public function resendOtp(User $user): bool
+    {
+        if ($user->contact_verified_at) {
+            return false;
+        }
+
+        $otpCode = Auth::generateOtp($user->contact, $this->otp);
+
+        $this->sendOtp($user, $otpCode);
+
+        return true;
+    }
+
 
     private function authenticate(string $contact, string $password): ?User
     {
@@ -118,5 +148,10 @@ class AuthenticationService
 
             $user->notify($notification);
         }
+    }
+
+    private function validateOtp(string $contact, string $otp): bool
+    {
+        return $this->otp->validate($contact, $otp)->status;
     }
 }
