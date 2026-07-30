@@ -5,6 +5,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Patient;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,4 +73,16 @@ function createUserWithType(string $type, string $contact, ?string $name = null)
 function getDataSets(string $userType, $test): array
 {
     return array_values($test->validData[$userType]);
+}
+
+function insertOtp(string $contact, bool $expired = false)
+{
+    DB::table('otps')->insert([
+        'identifier' => $contact,
+        'token' => '123456',
+        'validity' => 15,
+        'valid' => 1,
+        'created_at' => $expired ? now()->subMinutes(30) : now(),
+        'updated_at' => $expired ? now()->subMinutes(30) : now(),
+    ]);
 }
