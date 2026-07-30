@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class Patient extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'id',
+        'user_id',
+        'date_of_birth',
+        'gender',
+        'national_id',
+        'status',
+        'last_visit_date',
+        'next_visit_date',
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date',
+    ];
+
+    protected function age(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->date_of_birth ? $this->date_of_birth->age : null,
+        );
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function doctors(): BelongsToMany
+    {
+        return $this->belongsToMany(Doctor::class, 'doctor_patient', 'patient_id', 'doctor_id')
+            ->withTimestamps();
+    }
+}

@@ -10,8 +10,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "ichtrojan/laravel-otp": "^2.0",
         "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.29",
+        "laravel/tinker": "^3.0",
+        "laravel/vonage-notification-channel": "^3.3",
+        "symfony/brevo-mailer": "^8.1",
+        "symfony/http-client": "^8.1",
+        "vonage/client": "^4.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -19,6 +26,7 @@
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
         "laravel/sail": "^1.64",
+        "laravel/telescope": "^5.21",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^4.7",

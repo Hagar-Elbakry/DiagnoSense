@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /*
@@ -15,7 +19,7 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(RefreshDatabase::class)
+    ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -44,7 +48,40 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function createUserWithType(string $type, string $contact, ?string $name = null): User
 {
-    // ..
+    $user = User::factory()->create([
+        'type' => $type,
+        'contact' => $contact,
+        'name' => $name ?? fake()->name(),
+    ]);
+
+    if ($type === 'doctor') {
+        Doctor::factory()->create([
+            'user_id' => $user->id,
+        ]);
+    } else {
+        Patient::factory()->create([
+            'user_id' => $user->id,
+        ]);
+    }
+
+    return $user;
+}
+
+function getDataSets(string $userType, $test): array
+{
+    return array_values($test->validData[$userType]);
+}
+
+function insertOtp(string $contact, bool $expired = false)
+{
+    DB::table('otps')->insert([
+        'identifier' => $contact,
+        'token' => '123456',
+        'validity' => 15,
+        'valid' => 1,
+        'created_at' => $expired ? now()->subMinutes(30) : now(),
+        'updated_at' => $expired ? now()->subMinutes(30) : now(),
+    ]);
 }
