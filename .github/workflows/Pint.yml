@@ -1,30 +1,57 @@
 name: PHP Linting (Pint)
+
 on:
   workflow_dispatch:
   push:
-  pull_request: 
+  pull_request:
+
 jobs:
-  Pint:
+  pint:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v6.0.2
-        with:
-         fetch-depth: 0
-         ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: composer
+
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Start Sail
+        run: docker compose up -d
+
+      - name: Wait for Sail
+        run: |
+          until docker compose exec -T laravel.test php -v; do
+            sleep 2
+          done
 
       - name: Fetch main branch
         run: git fetch origin main
-      
-      - name: Launch Pint inspection
-        run: vendor/bin/pint --diff=origin/main
- 
+
+      - name: Run Pint
+        run: docker compose exec -T laravel.test ./vendor/bin/pint --diff=origin/main
+
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v7.1.0
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: Fix coding style with Laravel Pint
+          commit_message: "style: fix coding style with Laravel Pint"
           skip_fetch: true
+
+      - name: Stop Sail
+        if: always()
+        run: docker compose down -v
