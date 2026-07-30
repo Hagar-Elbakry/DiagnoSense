@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\V1\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Services\Auth\AuthenticationService;
-use App\Http\Requests\Auth\RegistrationRequest;
-use Illuminate\Http\JsonResponse;
 use App\Helpers\ApiResponse;
-use App\Http\Resources\UserResource; 
-use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
+use App\Http\Requests\Auth\RegistrationRequest;
+use App\Http\Resources\UserResource;
+use App\Services\Auth\AuthenticationService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticationController extends Controller
 {
     public function __construct(
         protected AuthenticationService $authenticationService
-    ){}
+    ) {}
 
     public function register(RegistrationRequest $request): JsonResponse
     {

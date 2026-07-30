@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\V1\Auth;
 
+use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\SocialAuthService;
-use Illuminate\Http\JsonResponse;
-use App\Helpers\ApiResponse;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-
+use Illuminate\Support\Facades\Log;
 
 class SocialAuthController extends Controller
 {

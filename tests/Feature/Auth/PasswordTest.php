@@ -3,11 +3,11 @@
 use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use App\Notifications\ResetPasswordSMSNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\DB;
 
-beforeEach(function() {
+beforeEach(function () {
     $doctorWithEmail = createUserWithType('doctor', 'testDoctor@gmail.com');
     $patientWithEmail = createUserWithType('patient', 'testPatient@gmail.com');
     $doctorWithPhone = createUserWithType('doctor', '01012345678');
@@ -37,24 +37,24 @@ dataset('contacts', [
     'doctor with email' => ['doctor', 'email'],
     'doctor with phone' => ['doctor', 'phone'],
     'patient with email' => ['patient', 'email'],
-    'patient with phone' => ['patient', 'phone']
+    'patient with phone' => ['patient', 'phone'],
 ]);
 
 dataset('invalid_contacts', [
-    'contact doesn\'t exist' => ['doctor','invalidContact@gmail.com'],
-    'contact that exists but wrong type' => ['doctor', 'testPatient@gmail.com']
+    'contact doesn\'t exist' => ['doctor', 'invalidContact@gmail.com'],
+    'contact that exists but wrong type' => ['doctor', 'testPatient@gmail.com'],
 ]);
 
 it('sends otp', function (string $type, string $contactType) {
     Mail::fake();
-   Notification::fake();
+    Notification::fake();
     $data = $this->validData[$type][$contactType];
     $response = $this->postJson(route('password.forget', $type), $data);
     $response->assertStatus(200);
     $response->assertJson([
         'message' => 'OTP has been sent to your registered contact.',
     ]);
-    if($contactType == 'email') {
+    if ($contactType == 'email') {
         Mail::assertQueued(ResetPasswordMail::class);
         Notification::assertNothingSent();
     } else {
@@ -71,8 +71,8 @@ it('fails to send otp', function (string $type, string $contact) {
     $response->assertJson([
         'success' => false,
         'data' => [
-            'contact' => ['This contact is invalid.']
-        ]
+            'contact' => ['This contact is invalid.'],
+        ],
     ]);
 })->with('invalid_contacts');
 
@@ -89,8 +89,8 @@ it('verifies otp', function (string $type, string $contactType) {
     $response->assertStatus(200);
     $response->assertJsonStructure([
         'data' => [
-            'reset_token'
-        ]
+            'reset_token',
+        ],
     ]);
 })->with('contacts');
 
@@ -99,11 +99,11 @@ it('fails to verify wrong otp', function (string $type, string $contactType) {
     $this->postJson(route('password.forget', $type), $data);
     $response = $this->postJson(route('password.verify', $type), [
         'contact' => $data['contact'],
-        'otp' => '000000'
+        'otp' => '000000',
     ]);
     $response->assertStatus(401);
     $response->assertJson([
-        'message' => 'Invalid Or Expired OTP.'
+        'message' => 'Invalid Or Expired OTP.',
     ]);
 })->with('contacts');
 
@@ -112,14 +112,13 @@ it('fails to verify expired otp', function (string $type, string $contactType) {
     insertOtp($data['contact'], true);
     $response = $this->postJson(route('password.verify', $type), [
         'contact' => $data['contact'],
-        'otp' => '123456'
+        'otp' => '123456',
     ]);
     $response->assertStatus(401);
     $response->assertJson([
-        'message' => 'Invalid Or Expired OTP.'
+        'message' => 'Invalid Or Expired OTP.',
     ]);
 })->with('contacts');
-
 
 it('allow user to reset password', function (string $type, string $contactType) {
     $data = $this->validData[$type][$contactType];
@@ -130,11 +129,11 @@ it('allow user to reset password', function (string $type, string $contactType) 
         'otp' => $otp,
     ]);
     $token = $response->json('data.reset_token');
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('password.reset', $type), [
             'password' => 'password',
             'password_confirmation' => 'password',
-        ]) 
+        ])
         ->assertStatus(200);
 })->with('contacts');
 
@@ -147,7 +146,7 @@ it('fails to reset password if password doesnt match', function (string $type, s
         'otp' => $otp,
     ]);
     $token = $response->json('data.reset_token');
-    $this->withHeader('Authorization', 'Bearer ' . $token)
+    $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('password.reset', $type), [
             'password' => 'password',
             'password_confirmation' => 'wrongPassword',
@@ -155,7 +154,7 @@ it('fails to reset password if password doesnt match', function (string $type, s
         ->assertStatus(422)
         ->assertJson([
             'data' => [
-                'password' => ['The password field confirmation does not match.']
-            ]
+                'password' => ['The password field confirmation does not match.'],
+            ],
         ]);
 })->with('contacts');

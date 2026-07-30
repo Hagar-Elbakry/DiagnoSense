@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Rules\ValidContactRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\ValidContactRule;
 use Illuminate\Validation\Rule;
 
 class RegistrationRequest extends FormRequest

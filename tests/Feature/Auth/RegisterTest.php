@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Event;
 use App\Events\User\UserRegistered;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
     Event::fake();
@@ -12,7 +12,6 @@ beforeEach(function () {
         'password_confirmation' => 'password',
     ];
 });
-
 
 it('allow user to register', function (string $contact) {
     $response = $this->postJson(

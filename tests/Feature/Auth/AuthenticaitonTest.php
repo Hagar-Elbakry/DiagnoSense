@@ -59,7 +59,6 @@ it('allow user to login', function (string $userType) {
     }
 })->with('user_types');
 
-
 it('fails login user with invalid credentials', function (string $userType, array $invalidCredentials) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
@@ -84,7 +83,6 @@ it('fails login user with invalid data', function (string $userType, array $inva
         ]);
     }
 })->with('user_types', 'invalid_data');
-
 
 it('allow user to logout', function (string $userType) {
     $dataSet = getDataSets($userType, $this);

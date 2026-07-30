@@ -1,16 +1,17 @@
-<?php 
+<?php
 
 namespace App\Services\Auth;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use App\Helpers\Auth;
+
 use App\Events\User\UserRegistered;
-use Ichtrojan\Otp\Otp;
-use Illuminate\Support\Facades\Hash;
-use App\Mail\ResetPasswordMail;
+use App\Helpers\Auth;
 use App\Mail\EmailVerificationMail;
-use App\Notifications\ResetPasswordSMSNotification;
+use App\Mail\ResetPasswordMail;
+use App\Models\User;
 use App\Notifications\EmailVerificationSMSNotification;
+use App\Notifications\ResetPasswordSMSNotification;
+use Ichtrojan\Otp\Otp;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class AuthenticationService
@@ -66,7 +67,7 @@ class AuthenticationService
     {
         $user = $this->getUser($data['contact']);
 
-        if (!$this->validateOtp($user->contact, $data['otp'])) {
+        if (! $this->validateOtp($user->contact, $data['otp'])) {
             return null;
         }
 
@@ -76,10 +77,10 @@ class AuthenticationService
         return $token;
     }
 
-    public function resetPassword(User $user, string $password) : void
+    public function resetPassword(User $user, string $password): void
     {
         $user->update([
-            'password' => $password
+            'password' => $password,
         ]);
 
         $user->tokens()->delete();
@@ -88,7 +89,6 @@ class AuthenticationService
     public function verifyContact(array $data, User $user): bool
     {
         return DB::transaction(function () use ($data, $user) {
-
 
             if (! $this->validateOtp($user->contact, $data['otp'])) {
                 return false;
@@ -114,7 +114,6 @@ class AuthenticationService
 
         return true;
     }
-
 
     private function authenticate(string $contact, string $password): ?User
     {

@@ -6,6 +6,7 @@ use App\Models\UserSocialAccount;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
+
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 
@@ -25,7 +26,6 @@ function mockSocialiteUser(
         ->once()
         ->andReturn($socialUser);
 }
-
 
 beforeEach(function () {
     Mail::fake();

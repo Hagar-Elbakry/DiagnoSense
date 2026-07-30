@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\V1\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Services\Auth\AuthenticationService;
-use App\Http\Requests\Auth\ContactVerificationRequest;
 use App\Helpers\ApiResponse;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ContactVerificationRequest;
+use App\Services\Auth\AuthenticationService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class ContactVerificationController extends Controller 
+class ContactVerificationController extends Controller
 {
     public function __construct(
         protected AuthenticationService $authenticationService

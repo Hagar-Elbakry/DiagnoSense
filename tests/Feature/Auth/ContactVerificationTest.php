@@ -2,15 +2,15 @@
 
 use App\Models\User;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = User::factory()->create([
-        'contact_verified_at' => null
+        'contact_verified_at' => null,
     ]);
 });
 
-it('can verify contact', function(){
+it('can verify contact', function () {
     insertOtp($this->user->contact);
-    $response = $this->actingAs($this->user,'sanctum')->postJson(route('verify-contact'), ['otp' => '123456']);
+    $response = $this->actingAs($this->user, 'sanctum')->postJson(route('verify-contact'), ['otp' => '123456']);
     $response->assertStatus(200);
     $this->assertNotNull($this->user->fresh()->contact_verified_at);
     $this->assertDatabaseHas('otps', ['valid' => 0]);
@@ -42,7 +42,7 @@ it('resend contact verification otp', function () {
 
 it('fails to resend contact verification otp with verified contact', function () {
     $this->user->update([
-        'contact_verified_at' => now()
+        'contact_verified_at' => now(),
     ]);
     $response = $this->actingAs($this->user, 'sanctum')->postJson(route('resend-otp'));
     $response->assertStatus(409);

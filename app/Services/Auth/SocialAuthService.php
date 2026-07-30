@@ -40,11 +40,11 @@ class SocialAuthService
                 ->first();
 
             if ($account) {
-                $user  = $account->user;
+                $user = $account->user;
             } else {
                 $user = User::where('contact', $socialUser->getEmail())->first();
                 if (! $user) {
-                    $user =  User::create([
+                    $user = User::create([
                         'name' => $socialUser->getName(),
                         'contact' => $socialUser->getEmail(),
                         'password' => Hash::make(Str::random(16)),
@@ -61,7 +61,7 @@ class SocialAuthService
                     ['provider_id' => $socialUser->getId()]
                 );
             }
-            
+
             return [
                 'user' => $user,
                 'token' => Auth::getToken($user),

@@ -10,9 +10,10 @@ class ResetPasswordRequest extends FormRequest
     {
         $user = auth()->user();
         $type = $this->route('type');
+
         return $user->type === $type;
     }
-    
+
     public function rules(): array
     {
         return [
