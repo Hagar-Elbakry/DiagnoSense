@@ -5,6 +5,9 @@ use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\V1\WalletController;
+use Illuminate\Http\Request;
+use App\Http\Controllers\V1\PaymobWebhookController;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -34,4 +37,18 @@ Route::prefix('v1')->group(function () {
             });
         });
     });
+
+    Route::middleware('auth:sanctum')->group(function(){
+        Route::controller(WalletController::class)->prefix('wallets')->as('wallets.')->group(function(){
+            Route::post('charge', 'store')->name('charge');
+        });
+    });
 });
+
+Route::get('/payment-redirect', function (Request $request) {
+    if ($request->query('success') === 'true') {
+        return redirect('https://diagnosense.vercel.app/subscription?status=success');
+    }
+});
+
+Route::post('/paymob/webhook', [PaymobWebhookController::class, 'handle'])->name('paymob.webhook');
