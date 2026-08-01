@@ -47,7 +47,7 @@ Route::prefix('v1')->group(function () {
 
 Route::get('/payment-redirect', function (Request $request) {
     if ($request->query('success') === 'true') {
-        return redirect('https://diagnosense.vercel.app/subscription?status=success');
+        return redirect(config('services.frontend.url').'/subscription?status=success');
     }
 });
 
