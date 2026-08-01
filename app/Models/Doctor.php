@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Subscription;
+use App\Models\Transaction;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Wallet;
 
 class Doctor extends Model
 {
@@ -35,5 +38,15 @@ class Doctor extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
     }
 }
