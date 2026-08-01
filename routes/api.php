@@ -41,6 +41,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function(){
         Route::controller(WalletController::class)->prefix('wallets')->as('wallets.')->group(function(){
             Route::post('charge', 'store')->name('charge');
+            Route::get('transactions', 'index')->name('transactions');
         });
     });
 });
