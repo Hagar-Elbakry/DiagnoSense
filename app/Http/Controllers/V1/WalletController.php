@@ -6,8 +6,10 @@ use App\Http\Requests\ChargeWalletRequest;
 use App\Helpers\ApiResponse;
 use Illuminate\Support\Facades\Log;
 use App\Services\PaymobService;
+use App\Actions\GetTransactionHistoryAction;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Exception;
-
 
 class WalletController extends Controller
 {
@@ -15,7 +17,20 @@ class WalletController extends Controller
         public PaymobService $paymobService,
     ) {}
 
-    public function store(ChargeWalletRequest $request)
+    public function index(Request $request, GetTransactionHistoryAction $action): JsonResponse
+    {
+        try{
+            $currentDoctor = $request->user()->doctor;
+        $data = $action->execute($currentDoctor);
+
+        return ApiResponse::success(message: 'Wallet transactions retrieved successfully', data: $data);
+        }catch(Exception $e){
+            Log::error('Error retrieving wallet transactions: ' . $e->getMessage());
+            return ApiResponse::error(message: 'Failed to retrieve wallet transactions', status: 500);
+        }
+    }
+
+    public function store(ChargeWalletRequest $request): JsonResponse
     {
         try{
             $currentUser = $request->user();
