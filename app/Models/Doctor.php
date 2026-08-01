@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User;
+use App\Models\Patient;
+use App\Models\Subscription;
 
 class Doctor extends Model
 {
@@ -26,5 +30,10 @@ class Doctor extends Model
     {
         return $this->belongsToMany(Patient::class, 'doctor_patient', 'doctor_id', 'patient_id')
             ->withTimestamps();
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
     }
 }
