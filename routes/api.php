@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\V1\WalletController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\V1\PaymobWebhookController;
+use App\Http\Controllers\V1\SubscriptionController;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -42,6 +43,10 @@ Route::prefix('v1')->group(function () {
         Route::controller(WalletController::class)->prefix('wallets')->as('wallets.')->group(function(){
             Route::post('charge', 'store')->name('charge');
             Route::get('transactions', 'index')->name('transactions');
+        });
+
+        Route::controller(SubscriptionController::class)->prefix('subscriptions')->as('subscriptions.')->group(function(){
+            Route::post('/{plan}/subscribe', 'store')->name('subscribe');
         });
     });
 });
