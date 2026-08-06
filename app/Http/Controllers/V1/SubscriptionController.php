@@ -43,4 +43,26 @@ class SubscriptionController extends Controller
             );
         }
     }
+
+    public function switchToPayPerUse(Request $request): JsonResponse
+    {
+        try{
+            $doctor = $request->user()->doctor;
+            if(!$doctor){
+                return ApiResponse::error('Doctor not found', 404);
+            }
+
+            $message = $this->subscriptionService->SwitchToPayPerUse($doctor);
+            return ApiResponse::success(
+                message: $message,
+            );
+        }catch(Exception $e){
+            Log::error('Pay-Per-Use Error: '.$e->getMessage());
+
+            return ApiResponse::error(
+                message: 'An error occurred while processing your pay-per-use request. Please try again later.',
+                status: 500
+            );
+        }
+    }
 }
