@@ -13,10 +13,11 @@ use App\Models\Subscription;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Wallet;
+use Illuminate\Notifications\Notifiable;
 
 class Doctor extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'user_id',
@@ -48,5 +49,16 @@ class Doctor extends Model
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->whereIn('status', ['active', 'cancelled'])
+            ->where('expires_at', '>', now())
+            ->whereHas('plan', function ($query) {
+                $query->whereColumn('subscriptions.used_summaries', '<', 'plans.summaries_limit');
+            })
+            ->latest();
     }
 }
