@@ -48,6 +48,7 @@ Route::prefix('v1')->group(function () {
         Route::controller(SubscriptionController::class)->prefix('subscriptions')->as('subscriptions.')->group(function(){
             Route::post('/{plan}/subscribe', 'store')->name('subscribe');
             Route::post('pay-per-use', 'switchToPayPerUse')->name('pay-per-use');
+            Route::get('current', 'show')->name('current');
         });
     });
 });
