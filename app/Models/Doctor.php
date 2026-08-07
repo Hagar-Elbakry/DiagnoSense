@@ -73,9 +73,9 @@ class Doctor extends Model
         if($this->billing_mode === 'pay-per-use') {
             return new SubscriptionStatus('pay-per-use', null, null);
         } elseif ($this->activeSubscription) {
-            return new SubscriptionStatus('subscription', $this->activeSubscription, $this->activeSubscription->status);
+            return new SubscriptionStatus('subscription', $this->activeSubscription->load('plan'), $this->activeSubscription->status);
         } elseif ($this->latestSubscription) {
-            return new SubscriptionStatus('subscription', $this->latestSubscription, 'expired');
+            return new SubscriptionStatus('subscription', $this->latestSubscription->load('plan'), 'expired');
         } else {
             return new SubscriptionStatus('none', null, null);
         }
