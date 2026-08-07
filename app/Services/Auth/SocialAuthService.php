@@ -53,6 +53,8 @@ class SocialAuthService
                     ]);
 
                     $user->doctor()->create();
+                    $user->contact_verified_at = now();
+                    $user->save();
                     Mail::to($user->contact)->queue(new WelcomeMail($user));
                 }
 
