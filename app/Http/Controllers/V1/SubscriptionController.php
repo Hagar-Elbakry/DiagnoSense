@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Services\SubscriptionService;
 use App\Exceptions\BillingValidationException;
+use App\Http\Resources\CurrentSubscriptionResource;
 use Exception;
 
 
@@ -61,6 +62,32 @@ class SubscriptionController extends Controller
 
             return ApiResponse::error(
                 message: 'An error occurred while processing your pay-per-use request. Please try again later.',
+                status: 500
+            );
+        }
+    }
+
+    public function show(Request $request)
+    {
+        try{
+            $doctor = $request->user()->doctor->loadMissing(['wallet', 'activeSubscription.plan', 'latestSubscription.plan']);
+            if(!$doctor->billing_mode) {
+                return ApiResponse::error(
+                    message: 'No active subscription or billing mode found.',
+                    data: $doctor->wallet ? ['credits' => $doctor->wallet->balance] : null,
+                    status: 404
+                );
+            }
+
+            return ApiResponse::success(
+            message: 'Current billing mode retrieved successfully',
+            data: new CurrentSubscriptionResource($doctor),
+        );
+        }catch(Exception $e){
+            Log::error('Show Subscription Error: '.$e->getMessage());
+
+            return ApiResponse::error(
+                message: 'An error occurred while retrieving your subscription details. Please try again later.',
                 status: 500
             );
         }
