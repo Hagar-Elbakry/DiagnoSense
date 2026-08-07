@@ -34,4 +34,15 @@ class Subscription extends Model
     {
         return $this->belongsTo(Plan::class);
     }
+
+    public function usageMetrics(): array
+    {
+        $limit = $this->plan->summaries_limit;
+        return [
+            'used' => $this->used_summaries,
+            'total' => $limit,
+            'remaining' => max(0, $limit - $this->used_summaries),
+            'percentage' => $limit > 0 ? round(($this->used_summaries / $limit) * 100, 2) : 0,
+        ];
+    }
 }
