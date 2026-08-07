@@ -70,7 +70,7 @@ class SubscriptionController extends Controller
     public function show(Request $request)
     {
         try{
-            $doctor = $request->user()->doctor->loadMissing(['wallet', 'activeSubscription.plan', 'latestSubscription.plan']);
+            $doctor = $request->user()->doctor->loadMissing(['wallet', 'activeSubscription', 'latestSubscription']);
             if(!$doctor->billing_mode) {
                 return ApiResponse::error(
                     message: 'No active subscription or billing mode found.',
@@ -90,6 +90,23 @@ class SubscriptionController extends Controller
                 message: 'An error occurred while retrieving your subscription details. Please try again later.',
                 status: 500
             );
+        }
+    }
+
+    public function update(Request $request): JsonResponse
+    {
+        try{
+            $doctor = $request->user()->doctor->loadMissing(['activeSubscription']);
+
+            $message = $this->subscriptionService->cancelSubscription($doctor);
+
+            return ApiResponse::success(message: $message);
+        } catch (BillingValidationException $e) {
+            return ApiResponse::error(message: $e->getMessage(), status: $e->getStatusCode());
+        } catch (Exception $e) {
+            Log::error('Subscription Cancellation Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while cancelling your subscription.', status: 500);
         }
     }
 }

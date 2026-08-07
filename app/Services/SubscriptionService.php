@@ -10,6 +10,7 @@ use App\Models\Subscription;
 use App\Notifications\PlanSubscribed;
 use App\Notifications\CreditsExhausted;
 use App\Notifications\PayPerUseActivated;
+use App\Notifications\SubscriptionCancelled;
 
 class SubscriptionService
 {
@@ -48,6 +49,21 @@ class SubscriptionService
         });
 
         return 'Switched to Pay-Per-Use mode. '.Plan::PAY_PER_USE_PRICE.'EGP will be charged per file.';
+    }
+
+    public function cancelSubscription(Doctor $doctor): string
+    {
+        $status = $doctor->currentSubscriptionStatus();
+
+        if (! $status->subscription || $status->mode === null) {
+            throw new BillingValidationException(__('No active subscription or billing mode found to cancel.'), 404);
+        }
+
+        if ($status->mode === 'pay-per-use') {
+            return $this->handlePayPerUseCancellation($doctor);
+        }
+        
+        return $this->handleSubscriptionCancellation($doctor, $status->subscription);
     }
 
     private function validateDoctorCanSubscribe(Doctor $doctor, Plan $plan): void
@@ -101,5 +117,46 @@ class SubscriptionService
         if ($doctor->wallet->refresh()->balance <= 0) {
             $doctor->notify(new CreditsExhausted);
         }
+    }
+
+    private function handlePayPerUseCancellation(Doctor $doctor): string
+    {
+        DB::transaction(function () use ($doctor) {
+            $doctor->update(['billing_mode' => null]);
+        });
+
+        return __('Pay-Per-Use mode has been disabled. Please subscribe to a plan to continue.');
+    }
+
+    private function handleSubscriptionCancellation(Doctor $doctor, Subscription $subscription): string
+    {
+        $plan = $subscription->plan;
+        DB::transaction(function () use ($doctor, $subscription, $plan) {
+            $subscription->update(['status' => 'cancelled']);
+            $doctor->update(['billing_mode' => null]);
+            DB::afterCommit(function () use ($doctor, $plan) {
+                $doctor->notify(new SubscriptionCancelled($plan->name));
+            });
+        });
+
+        return $this->buildCancellationMessage($subscription);
+    }
+
+    private function buildCancellationMessage(Subscription $subscription): string
+    {
+        $usage = $subscription->usageMetrics();
+        $limitReached = $usage['used'] >= $usage['total'];
+        if ($limitReached) {
+            return __('Subscription cancelled. Note: You have already reached your limit of :limit summaries.', [
+                'limit' => $usage['total'],
+            ]);
+        }
+
+        $remaining = $usage['remaining'];
+
+        return __('Subscription cancelled. You can still use your remaining :remaining summaries until :date', [
+            'remaining' => $remaining,
+            'date' => $subscription->expires_at->format('D, F j, Y'),
+        ]);
     }
 }
