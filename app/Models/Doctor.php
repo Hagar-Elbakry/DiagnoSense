@@ -14,6 +14,7 @@ use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Wallet;
 use Illuminate\Notifications\Notifiable;
+use App\Helpers\SubscriptionStatus;
 
 class Doctor extends Model
 {
@@ -60,5 +61,23 @@ class Doctor extends Model
                 $query->whereColumn('subscriptions.used_summaries', '<', 'plans.summaries_limit');
             })
             ->latest();
+    }
+
+    public function latestSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    public function currentSubscriptionStatus(): SubscriptionStatus
+    {
+        if($this->billing_mode === 'pay-per-use') {
+            return new SubscriptionStatus('pay-per-use', null, null);
+        } elseif ($this->activeSubscription) {
+            return new SubscriptionStatus('subscription', $this->activeSubscription, $this->activeSubscription->status);
+        } elseif ($this->latestSubscription) {
+            return new SubscriptionStatus('subscription', $this->latestSubscription, 'expired');
+        } else {
+            return new SubscriptionStatus('none', null, null);
+        }
     }
 }
