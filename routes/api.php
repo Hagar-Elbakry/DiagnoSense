@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
             Route::post('pay-per-use', 'switchToPayPerUse')->name('pay-per-use');
             Route::get('current', 'show')->name('current');
             Route::patch('cancel', 'update')->name('cancel');
+            Route::get('plans', 'index')->name('plans');
         });
     });
 });
