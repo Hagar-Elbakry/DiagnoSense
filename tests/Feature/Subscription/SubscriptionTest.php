@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Notification;
-use Database\Seeders\PlanSeeder;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Notifications\PayPerUseActivated;
+use Database\Seeders\PlanSeeder;
+use Illuminate\Support\Facades\Notification;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
@@ -75,7 +76,6 @@ it('returns the correct current subscription metrics and features', function () 
     $response = $this->getJson(route('subscriptions.current'));
     $response->assertStatus(200)->assertJsonPath('data.billing_mode', 'subscription');
 });
-
 
 it('cancels the active subscription and returns helpful UX message', function () {
     $this->doctor->update(['billing_mode' => 'subscription']);

@@ -4,10 +4,9 @@ namespace App\Http\Resources;
 
 use App\Helpers\SubscriptionStatus;
 use App\Models\Plan;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\Subscription;
-use Override;
 
 class CurrentSubscriptionResource extends JsonResource
 {

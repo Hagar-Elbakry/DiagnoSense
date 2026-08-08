@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
+use App\Helpers\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\User;
-use App\Models\Patient;
-use App\Models\Subscription;
-use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\Wallet;
 use Illuminate\Notifications\Notifiable;
-use App\Helpers\SubscriptionStatus;
 
 class Doctor extends Model
 {
@@ -70,7 +65,7 @@ class Doctor extends Model
 
     public function currentSubscriptionStatus(): SubscriptionStatus
     {
-        if($this->billing_mode === 'pay-per-use') {
+        if ($this->billing_mode === 'pay-per-use') {
             return new SubscriptionStatus('pay-per-use', null, null);
         } elseif ($this->activeSubscription) {
             return new SubscriptionStatus('subscription', $this->activeSubscription->loadMissing('plan'), $this->activeSubscription->status);

@@ -1,16 +1,16 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers\V1;
+
+use App\Exceptions\InvalidHmacException;
+use App\Exceptions\MissingHmacException;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Models\Transactions;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\MissingHmacException;
-use App\Exceptions\InvalidHmacException;
-use App\Models\Transaction;
 
 class PaymobWebhookController extends Controller
 {

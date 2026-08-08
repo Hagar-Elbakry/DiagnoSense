@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Doctor;
-use App\Models\Plan;
 
 class Subscription extends Model
 {
@@ -38,6 +36,7 @@ class Subscription extends Model
     public function usageMetrics(): array
     {
         $limit = $this->plan->summaries_limit;
+
         return [
             'used' => $this->used_summaries,
             'total' => $limit,

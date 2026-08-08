@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
+use App\Exceptions\BillingValidationException;
 use App\Models\Doctor;
 use App\Models\Plan;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\BillingValidationException;
 use App\Models\Subscription;
-use App\Notifications\PlanSubscribed;
 use App\Notifications\CreditsExhausted;
 use App\Notifications\PayPerUseActivated;
+use App\Notifications\PlanSubscribed;
 use App\Notifications\SubscriptionCancelled;
 use App\Helpers\SubscriptionStatus;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionService
 {
@@ -31,7 +31,7 @@ class SubscriptionService
         });
     }
 
-    public function switchToPayPerUse(Doctor $doctor) : string
+    public function switchToPayPerUse(Doctor $doctor): string
     {
         DB::transaction(function () use ($doctor) {
             $doctor->update([
@@ -63,7 +63,7 @@ class SubscriptionService
         if ($status->mode === 'pay-per-use') {
             return $this->handlePayPerUseCancellation($doctor);
         }
-        
+
         return $this->handleSubscriptionCancellation($doctor, $status->subscription);
     }
 
