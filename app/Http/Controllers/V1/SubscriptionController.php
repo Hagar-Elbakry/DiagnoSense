@@ -90,7 +90,8 @@ class SubscriptionController extends Controller
     {
         try{
             $doctor = $request->user()->doctor->loadMissing(['wallet', 'activeSubscription', 'latestSubscription']);
-            if(!$doctor->billing_mode) {
+            $status = $doctor->currentSubscriptionStatus();
+            if($status->mode === 'none') {
                 return ApiResponse::error(
                     message: 'No active subscription or billing mode found.',
                     data: $doctor->wallet ? ['credits' => $doctor->wallet->balance] : null,
@@ -100,7 +101,7 @@ class SubscriptionController extends Controller
 
             return ApiResponse::success(
             message: 'Current billing mode retrieved successfully',
-            data: new CurrentSubscriptionResource($doctor),
+            data: new CurrentSubscriptionResource($doctor, $status),
         );
         }catch(Exception $e){
             Log::error('Show Subscription Error: '.$e->getMessage());
