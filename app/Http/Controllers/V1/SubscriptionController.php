@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\SubscriptionService;
 use App\Exceptions\BillingValidationException;
 use App\Http\Resources\CurrentSubscriptionResource;
+use App\Http\Resources\PlanResource;
 use Exception;
 
 
@@ -19,6 +20,24 @@ class SubscriptionController extends Controller
     public function __construct(
         protected SubscriptionService $subscriptionService
     ) {}
+
+    public function index(): JsonResponse
+    {
+        try{
+            $plans = Plan::all();
+            return ApiResponse::success(
+                message:'Available plans retrieved successfully',
+                data: PlanResource::collection($plans)
+            );
+        }catch(Exception $e){
+            Log::error('Error retrieving plans: '.$e->getMessage());
+
+            return ApiResponse::error(
+                message: 'An error occurred while retrieving plans.',
+                status: 500
+            );
+        }
+    }
 
     public function store(Request $request, Plan $plan): JsonResponse
     {
