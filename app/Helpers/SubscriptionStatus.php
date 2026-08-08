@@ -10,6 +10,5 @@ class SubscriptionStatus
         public readonly string $mode,
         public readonly ?Subscription $subscription,
         public readonly ?string $status,
-    ) {
-    }
+    ) {}
 }

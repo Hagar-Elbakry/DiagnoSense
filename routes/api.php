@@ -4,11 +4,11 @@ use App\Http\Controllers\V1\Auth\AuthenticationController;
 use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\V1\WalletController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
+use App\Http\Controllers\V1\WalletController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -39,13 +39,13 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::middleware('auth:sanctum')->group(function(){
-        Route::controller(WalletController::class)->prefix('wallets')->as('wallets.')->group(function(){
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::controller(WalletController::class)->prefix('wallets')->as('wallets.')->group(function () {
             Route::post('charge', 'store')->name('charge');
             Route::get('transactions', 'index')->name('transactions');
         });
 
-        Route::controller(SubscriptionController::class)->prefix('subscriptions')->as('subscriptions.')->group(function(){
+        Route::controller(SubscriptionController::class)->prefix('subscriptions')->as('subscriptions.')->group(function () {
             Route::post('/{plan}/subscribe', 'store')->name('subscribe');
             Route::post('pay-per-use', 'switchToPayPerUse')->name('pay-per-use');
             Route::get('current', 'show')->name('current');

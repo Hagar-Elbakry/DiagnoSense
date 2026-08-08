@@ -1,7 +1,8 @@
 <?php
 
-use function Pest\Laravel\actingAs;
 use Illuminate\Support\Facades\Http;
+
+use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     $this->doctor = createUserWithType('doctor', fake()->unique()->safeEmail());
