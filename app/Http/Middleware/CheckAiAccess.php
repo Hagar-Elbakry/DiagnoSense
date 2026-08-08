@@ -5,9 +5,9 @@ namespace App\Http\Middleware;
 use App\Exceptions\BillingValidationException;
 use App\Helpers\ApiResponse;
 use App\Services\SubscriptionService;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Closure;
 
 class CheckAiAccess
 {

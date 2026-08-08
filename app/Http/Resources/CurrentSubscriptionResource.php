@@ -10,7 +10,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CurrentSubscriptionResource extends JsonResource
 {
-    
     public function __construct($resource, private SubscriptionStatus $status)
     {
         parent::__construct($resource);

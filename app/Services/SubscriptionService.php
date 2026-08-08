@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\BillingValidationException;
+use App\Helpers\SubscriptionStatus;
 use App\Models\Doctor;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -10,7 +11,6 @@ use App\Notifications\CreditsExhausted;
 use App\Notifications\PayPerUseActivated;
 use App\Notifications\PlanSubscribed;
 use App\Notifications\SubscriptionCancelled;
-use App\Helpers\SubscriptionStatus;
 use Illuminate\Support\Facades\DB;
 
 class SubscriptionService
@@ -192,7 +192,7 @@ class SubscriptionService
         if ($status->status === 'active' || $status->status === 'cancelled') {
             return;
         }
-        
+
         $latestSub = $status->subscription;
 
         if ($latestSub->expires_at->isPast()) {

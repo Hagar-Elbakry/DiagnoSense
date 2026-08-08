@@ -9,11 +9,10 @@ use App\Http\Resources\CurrentSubscriptionResource;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
 use App\Services\SubscriptionService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Exception;
-
 
 class SubscriptionController extends Controller
 {
@@ -94,7 +93,7 @@ class SubscriptionController extends Controller
         try {
             $doctor = $request->user()->doctor->loadMissing(['wallet', 'activeSubscription', 'latestSubscription']);
             $status = $doctor->currentSubscriptionStatus();
-            if($status->mode === 'none') {
+            if ($status->mode === 'none') {
                 return ApiResponse::error(
                     message: 'No active subscription or billing mode found.',
                     data: $doctor->wallet ? ['credits' => $doctor->wallet->balance] : null,
@@ -103,10 +102,10 @@ class SubscriptionController extends Controller
             }
 
             return ApiResponse::success(
-            message: 'Current billing mode retrieved successfully',
-            data: new CurrentSubscriptionResource($doctor, $status),
-        );
-        }catch(Exception $e){
+                message: 'Current billing mode retrieved successfully',
+                data: new CurrentSubscriptionResource($doctor, $status),
+            );
+        } catch (Exception $e) {
             Log::error('Show Subscription Error: '.$e->getMessage());
 
             return ApiResponse::error(
