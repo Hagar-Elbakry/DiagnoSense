@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\ApiResponse;
+use App\Http\Middleware\CheckAiAccess;
 use App\Http\Middleware\CheckUserType;
 use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'check-user-type' => CheckUserType::class,
+            'check-ai-access' => CheckAiAccess::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);

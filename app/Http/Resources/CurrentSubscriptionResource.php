@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\SubscriptionStatus;
 use App\Models\Plan;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
@@ -9,9 +10,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CurrentSubscriptionResource extends JsonResource
 {
+    public function __construct($resource, private SubscriptionStatus $status)
+    {
+        parent::__construct($resource);
+    }
+
     public function toArray(Request $request): array
     {
-        $status = $this->currentSubscriptionStatus();
+        $status = $this->status;
         $baseData = [
             'billing_mode' => $status->mode,
             'balance' => (float) ($this->wallet->balance ?? 0),
@@ -36,7 +42,7 @@ class CurrentSubscriptionResource extends JsonResource
         ];
     }
 
-    private function formatSubscriptionData(?Subscription $subscription, string $status): array
+    private function formatSubscriptionData(Subscription $subscription, string $status): array
     {
         $plan = $subscription->plan;
 

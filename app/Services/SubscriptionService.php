@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\BillingValidationException;
+use App\Helpers\SubscriptionStatus;
 use App\Models\Doctor;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -55,7 +56,7 @@ class SubscriptionService
     {
         $status = $doctor->currentSubscriptionStatus();
 
-        if (! $status->subscription || $status->mode === null) {
+        if ($status->mode === 'none') {
             throw new BillingValidationException(__('No active subscription or billing mode found to cancel.'), 404);
         }
 
@@ -64,6 +65,22 @@ class SubscriptionService
         }
 
         return $this->handleSubscriptionCancellation($doctor, $status->subscription);
+    }
+
+    public function validateAiAccess(Doctor $doctor): void
+    {
+        $doctor->loadMissing(['wallet', 'activeSubscription', 'latestSubscription']);
+        $status = $doctor->currentSubscriptionStatus();
+
+        if ($status->mode === 'none') {
+            throw new BillingValidationException(__('No active subscription or billing mode found. Please subscribe to a plan.'), 403);
+        }
+
+        if ($status->mode === 'pay-per-use') {
+            $this->validatePayPerUse($doctor);
+        } else {
+            $this->validateSubscription($status);
+        }
     }
 
     private function validateDoctorCanSubscribe(Doctor $doctor, Plan $plan): void
@@ -158,5 +175,37 @@ class SubscriptionService
             'remaining' => $remaining,
             'date' => $subscription->expires_at->format('D, F j, Y'),
         ]);
+    }
+
+    private function validatePayPerUse(Doctor $doctor): void
+    {
+        if (! $doctor->wallet || $doctor->wallet->balance < Plan::PAY_PER_USE_PRICE) {
+            throw new BillingValidationException(
+                __('Insufficient credits. Please recharge to use Pay-Per-Use (E£'.Plan::PAY_PER_USE_PRICE.'/file).'),
+                403
+            );
+        }
+    }
+
+    private function validateSubscription(SubscriptionStatus $status): void
+    {
+        if ($status->status === 'active' || $status->status === 'cancelled') {
+            return;
+        }
+
+        $latestSub = $status->subscription;
+
+        if ($latestSub->expires_at->isPast()) {
+            throw new BillingValidationException(__('Your subscription has expired. Please renew.'), 403);
+        }
+
+        $usage = $latestSub->usageMetrics();
+
+        if ($usage['used'] >= $usage['total']) {
+            throw new BillingValidationException(
+                __("You have reached your plan limit ({$usage['total']} summaries)."),
+                403
+            );
+        }
     }
 }
