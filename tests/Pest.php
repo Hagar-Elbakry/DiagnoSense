@@ -85,3 +85,13 @@ function insertOtp(string $contact, bool $expired = false)
         'updated_at' => $expired ? now()->subMinutes(30) : now(),
     ]);
 }
+
+function createDoctorWithBilling(string $billingMode = 'pay-per-use', int $balance = 100000): User
+{
+    $user = createUserWithType('doctor', fake()->unique()->safeEmail());
+    $user->doctor->billing_mode = $billingMode;
+    $user->doctor->save();
+    $user->doctor->wallet()->create(['balance' => $balance]);
+
+    return $user;
+}
