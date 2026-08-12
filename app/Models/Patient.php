@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\MedicalHistory;
 use App\Models\Report;
+use App\Models\AiAnalysisResult;
 
 class Patient extends Model
 {
@@ -57,5 +58,10 @@ class Patient extends Model
     public function reports(): HasMany
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function latestAiAnalysisResult(): HasOne
+    {
+        return $this->hasOne(AiAnalysisResult::class)->latest();
     }
 }
