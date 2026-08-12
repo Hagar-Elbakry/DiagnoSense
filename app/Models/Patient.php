@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\MedicalHistory;
+use App\Models\Report;
 
 class Patient extends Model
 {
@@ -50,5 +52,10 @@ class Patient extends Model
     public function medicalHistory(): HasOne
     {
         return $this->hasOne(MedicalHistory::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
     }
 }
