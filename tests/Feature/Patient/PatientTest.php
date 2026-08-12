@@ -11,8 +11,10 @@ beforeEach(function () {
     Queue::fake();
     Http::fake();
     Storage::fake('azure');
-    $this->user = createDoctorWithBilling();
-    actingAs($this->user);
+    $this->doctorUser = createDoctorWithBilling();
+    $this->patientUser = createUserWithType('patient', 'testPatient@gmail.com');
+    $this->doctorUser->doctor->patients()->attach($this->patientUser->patient->id);
+    actingAs($this->doctorUser);
     $this->validPatientData = validPatientData();
 });
 
@@ -63,7 +65,7 @@ it('allow doctor to create patient successfully', function () {
         ]);
     }
     $this->assertDatabaseHas('doctor_patient', [
-        'doctor_id' => $this->user->doctor->id,
+        'doctor_id' => $this->doctorUser->doctor->id,
         'patient_id' => $response->json('data.patient_id'),
     ]);
     Queue::assertPushed(AiAnalysisJob::class);
@@ -95,4 +97,21 @@ it('if fails validation when contact is already taken', function () {
         'message' => 'Validation Errors',
         'data' => ['contact' => ['The contact has already been taken.']],
     ]);
+});
+
+it('allows doctor to delete their patient', function () {
+    $response = $this->actingAs($this->doctorUser, 'sanctum')->deleteJson(route('patients.destroy', ['patient' => $this->patientUser->patient->id]));
+    $response->assertStatus(200);
+    $this->assertSoftDeleted('patients', ['id' => $this->patientUser->patient->id]);
+    $response->assertJson([
+        'message' => 'Patient deleted successfully.'
+    ]);
+});
+
+it('denies doctor from delete someone else\'s patient', function () {
+    $otherDoctor = createDoctorWithBilling();
+    $otherPatient = createUserWithType('patient', 'otherPatient@gmail.com');
+    $otherDoctor->doctor->patients()->attach($otherPatient->patient->id);
+    $response = $this->actingAs($this->doctorUser, 'sanctum')->deleteJson(route('patients.destroy', ['patient' => $otherPatient->patient->id]));
+    $response->assertStatus(403);
 });
