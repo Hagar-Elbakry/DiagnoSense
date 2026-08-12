@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\DecisionSupport;
+use App\Models\KeyPoint;
 
 class AiAnalysisResult extends Model
 {
@@ -33,5 +34,10 @@ class AiAnalysisResult extends Model
     public function decisionSupports(): HasMany
     {
         return $this->hasMany(DecisionSupport::class);
+    }
+
+    public function keyPoints(): HasMany
+    {
+        return $this->hasMany(KeyPoint::class);
     }
 }
