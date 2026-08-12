@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\DecisionSupport;
 
 class AiAnalysisResult extends Model
 {
@@ -26,5 +28,10 @@ class AiAnalysisResult extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function decisionSupports(): HasMany
+    {
+        return $this->hasMany(DecisionSupport::class);
     }
 }
