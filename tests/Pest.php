@@ -117,3 +117,50 @@ function validPatientData(): array
         'current_complaints' => fake()->word(),
     ];
 }
+
+function fakeAiResponse(): array
+{
+    return [
+        'key_information' => [
+            'ai_insight' => 'Test AI Insight',
+            'ai_summary' => 'Test AI Summary',
+            'high_priority_alerts' => [
+                [
+                    'title' => 'High Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+            'low_priority_alerts' => [
+                [
+                    'title' => 'Low Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+            'medium_priority_alerts' => [
+                [
+                    'title' => 'Medium Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+        ],
+        'decision_support' => [
+            [
+                'condition' => 'Condition 1',
+                'probability' => 0.8,
+                'status' => 'Positive',
+                'clinical_reasoning' => 'Clinical Reasons 1',
+            ],
+            [
+                'condition' => 'Condition 2',
+                'probability' => 0.6,
+                'status' => 'Negative',
+                'clinical_reasoning' => 'Clinical Reasons 2',
+            ],
+        ],
+        'message' => 'Analysis completed successfully',
+        'pdf_path' => 'path/to/ocr/report.pdf',
+    ];
+}
