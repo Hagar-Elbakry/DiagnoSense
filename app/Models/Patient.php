@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\MedicalHistory;
 
 class Patient extends Model
 {
@@ -43,5 +45,10 @@ class Patient extends Model
     {
         return $this->belongsToMany(Doctor::class, 'doctor_patient', 'patient_id', 'doctor_id')
             ->withTimestamps();
+    }
+
+    public function medicalHistory(): HasOne
+    {
+        return $this->hasOne(MedicalHistory::class);
     }
 }
