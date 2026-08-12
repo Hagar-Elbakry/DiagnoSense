@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\MedicalHistory;
 use App\Models\Report;
 use App\Models\AiAnalysisResult;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'id',
