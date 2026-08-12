@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Helpers;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+
+class FileSystem
+{
+    public static function storeFile(UploadedFile $file, string $path, string $fileName = '', string $disk = 'azure'): string
+    {
+        return $fileName ?
+            Storage::disk($disk)->putFileAs($path, $file, $fileName)
+            : Storage::disk($disk)->putFile($path, $file);
+    }
+
+    public static function deleteFile(string $path, string $disk = 'azure'): bool
+    {
+        return Storage::disk($disk)->delete($path);
+    }
+}
