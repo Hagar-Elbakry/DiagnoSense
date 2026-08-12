@@ -47,6 +47,11 @@ class PatientService
         });
     }
 
+    public function deletePatient(Patient $patient): bool
+    {
+        return (bool) $patient->delete();
+    }
+
     private function storeUser(array $data): User
     {
         $user = User::create([

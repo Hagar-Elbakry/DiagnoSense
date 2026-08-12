@@ -7,8 +7,11 @@ use App\Http\Requests\StorePatientRequest;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\ApiResponse;
 use App\Services\PatientService;
-use Exception;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\DeletePatientRequest;
+use App\Models\Patient;
+use Exception;
+
 
 class PatientController extends Controller
 {
@@ -36,6 +39,25 @@ class PatientController extends Controller
             Log::error('Patient Store Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating patient.', status: 500);
+        }
+    }
+
+    public function destroy(DeletePatientRequest $request, Patient $patient): JsonResponse
+    {
+
+        try {
+            $this->patientService->deletePatient($patient);
+            return ApiResponse::success(
+                message: 'Patient deleted successfully.'
+            );
+
+        } catch (Exception $e) {
+            Log::error('Error deleting patient: '.$e->getMessage(), ['id' => $patient->id]);
+
+            return ApiResponse::error(
+                message: 'Failed to delete patient, please try again later.',
+                status: 500
+            );
         }
     }
 }
