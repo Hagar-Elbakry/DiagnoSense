@@ -12,7 +12,10 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
+use Throwable;
 
 class AiAnalysisJob implements ShouldQueue
 {
@@ -52,6 +55,40 @@ class AiAnalysisJob implements ShouldQueue
             throw new Exception('AI analysis failed with status '.$response->status());
         }
 
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        $analysisRecord = AiAnalysisResult::find($this->analysisId);
+
+        if ($analysisRecord) {
+            $analysisRecord->update([
+                'response' => ['error' => 'AI analysis failed after all retries', 'details' => $exception->getMessage()],
+                'status' => 'failed',
+            ]);
+            $filePathsToDelete = [];
+            foreach (['lab', 'radiology', 'medical_history'] as $type) {
+                if (! empty($this->jobData['file_paths'][$type])) {
+                    $filePathsToDelete = array_merge($filePathsToDelete, $this->jobData['file_paths'][$type]);
+                }
+            }
+
+            if (! empty($filePathsToDelete)) {
+                foreach ($filePathsToDelete as $path) {
+                    FileSystem::deleteFile($path);
+                }
+
+                DB::table('reports')
+                    ->where('patient_id', $this->jobData['patient_id'])
+                    ->whereIn('file_path', $filePathsToDelete)
+                    ->delete();
+
+                Log::info('AI Clean-up executed via FileSystem: Deleted failed job files.', [
+                    'patient_id' => $this->jobData['patient_id'],
+                    'deleted_paths' => $filePathsToDelete
+                ]);
+            }
+        }
     }
 
     private function generateUrls(string $type): array
