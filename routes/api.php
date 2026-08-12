@@ -56,6 +56,7 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function(){
             Route::post('', 'store')->name('store')->middleware('check-ai-access');
+            Route::delete('/{patient}', 'destroy')->name('destroy');
         });
     });
 });
