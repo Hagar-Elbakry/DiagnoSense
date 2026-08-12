@@ -18,4 +18,9 @@ class FileSystem
     {
         return Storage::disk($disk)->delete($path);
     }
+
+    public static function getTempUrl(string $path, string $disk = 'azure'): string
+    {
+        return Storage::disk($disk)->temporaryUrl($path, now()->addMinutes(60));
+    }
 }
