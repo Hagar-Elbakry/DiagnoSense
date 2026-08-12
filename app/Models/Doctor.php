@@ -75,4 +75,17 @@ class Doctor extends Model
             return new SubscriptionStatus('none', null, null);
         }
     }
+
+    public function hasFeature(string $featureName): bool
+    {
+        $status = $this->currentSubscriptionStatus();
+        if ($status->mode === 'pay-per-use') {
+            return true;
+        } elseif($status->mode === 'subscription' && ($status->status === 'active' || $status->status === 'cancelled')) {
+            $features = $status->subscription->plan->features;
+            return in_array($featureName, $features ?? []);
+        }
+        
+        return false;
+    }
 }
