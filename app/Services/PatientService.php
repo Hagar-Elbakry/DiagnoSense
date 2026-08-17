@@ -81,6 +81,15 @@ class PatientService
         });
     }
 
+    public function getPatientEditData(Patient $patient)
+    {
+        return $patient->load([
+            'user',
+            'medicalHistory',
+            'reports',
+        ]);
+    }
+
     public function deletePatient(Patient $patient): bool
     {
         return (bool) $patient->delete();

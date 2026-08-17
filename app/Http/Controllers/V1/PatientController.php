@@ -9,9 +9,11 @@ use App\Helpers\ApiResponse;
 use App\Services\PatientService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\DeletePatientRequest;
+use App\Http\Requests\GetPatientDataForUpdateRequest;
 use App\Http\Requests\PatientListRequest;
 use App\Models\Patient;
 use App\Http\Resources\PatientResource;
+use App\Http\Resources\PatientEditResource;
 use Exception;
 
 
@@ -58,6 +60,22 @@ class PatientController extends Controller
             Log::error('Patient Store Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating patient.', status: 500);
+        }
+    }
+
+    public function edit(GetPatientDataForUpdateRequest $request, Patient $patient)
+    {
+        try{
+            $patient = $this->patientService->getPatientEditData($patient);
+            
+            return ApiResponse::success(
+                message: 'Data retrieved successfully',
+                data: new PatientEditResource($patient)
+            );
+        } catch(Exception $e){
+            Log::error('Error retrieving patient data for edit: '.$e->getMessage(), ['id' => $patient->id]);
+
+            return ApiResponse::error(message: 'An error occurred while retrieving patient data for edit.', status: 500);
         }
     }
 
