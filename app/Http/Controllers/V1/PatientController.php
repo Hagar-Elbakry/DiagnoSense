@@ -9,7 +9,9 @@ use App\Helpers\ApiResponse;
 use App\Services\PatientService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\DeletePatientRequest;
+use App\Http\Requests\PatientListRequest;
 use App\Models\Patient;
+use App\Http\Resources\PatientResource;
 use Exception;
 
 
@@ -19,6 +21,23 @@ class PatientController extends Controller
     public function __construct(
         protected PatientService $patientService
     ){}
+
+    public function index(PatientListRequest $request): JsonResponse
+    {
+        try{
+            $doctor = $request->user()->doctor;
+            $patients = $this->patientService->getPaginatedPatients($doctor, $request->validated());
+            return ApiResponse::success(
+                message: 'Patients list retrieved successfully',
+                data: PatientResource::collection($patients)->response()->getData(true),
+            );
+
+        } catch(Exception $e){
+            Log::error('Patient Index Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while fetching patients.', status: 500);
+        }
+    }
 
     public function store(StorePatientRequest $request): JsonResponse
     {
