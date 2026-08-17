@@ -22,7 +22,6 @@ class PatientFactory extends Factory
             'user_id' => User::factory()->patient(),
             'national_id' => fake()->unique()->numerify('##############'),
             'date_of_birth' => fake()->date(),
-            'status' => 'stable',
         ];
     }
 }
