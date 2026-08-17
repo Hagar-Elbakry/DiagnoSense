@@ -5,17 +5,64 @@ use App\Models\MedicalHistory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     Queue::fake();
     Http::fake();
     Storage::fake('azure');
     $this->doctorUser = createDoctorWithBilling();
-    $this->patientUser = createUserWithType('patient', 'testPatient@gmail.com');
-    $this->doctorUser->doctor->patients()->attach($this->patientUser->patient->id);
-    actingAs($this->doctorUser);
+    $this->patientUser = createUserWithType('patient', 'testPatient@gmail.com', 'UniquePatientName');
+    $this->stablePatient = createUserWithType('patient', 'stablePatient@gmail.com');
+    $this->criticalPatient = createUserWithType('patient', 'criticalPatient@gmail.com');
+    $this->doctorUser->doctor->patients()->attach([
+        $this->patientUser->patient->id,
+        $this->stablePatient->patient->id,
+        $this->criticalPatient->patient->id
+    ]);
+    $this->stablePatient->patient->update(['status' => 'stable']);
+    $this->criticalPatient->patient->update(['status' => 'critical']);
+    $this->actingAs($this->doctorUser, 'sanctum');
     $this->validPatientData = validPatientData();
+});
+
+it('gets patients list', function () {
+    $response = $this->getJson(route('patients.index'));
+    $response->assertStatus(200);
+    $response->assertJsonCount(3, 'data.data');
+    $response->assertJsonStructure([
+        'data' => [
+            'data' => [
+                '*' => [
+                    'id',
+                    'name',
+                    'age',
+                    'status',
+                    'ai_insight',
+                ]
+            ],
+            'links',
+            'meta'
+        ]
+    ]);
+});
+
+it('allows doctor to search by name', function () {
+    $response = $this->getJson(route('patients.index', ['search' => $this->patientUser->name]));
+    $response->assertStatus(200);
+    $response->assertJsonCount(1, 'data.data');
+});
+
+it('allows doctor to search by national id', function () {
+    $this->patientUser->patient->update(['national_id' => '123456789']);
+    $response = $this->getJson(route('patients.index', ['search' => $this->patientUser->patient->national_id]));
+    $response->assertStatus(200);
+    $response->assertJsonCount(1, 'data.data');
+});
+
+it('allows doctor to filter by status', function () {
+    $response = $this->getJson(route('patients.index', ['status' => $this->stablePatient->patient->status]));
+    $response->assertStatus(200);
+    $response->assertJsonCount(1, 'data.data');
 });
 
 it('allow doctor to create patient successfully', function () {
