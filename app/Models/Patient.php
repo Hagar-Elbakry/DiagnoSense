@@ -65,4 +65,13 @@ class Patient extends Model
     {
         return $this->hasOne(AiAnalysisResult::class)->latest();
     }
+
+    public function latestAiAnalysisValue(string $column): ?string
+    {
+        return $this->aiAnalysisResults()
+        ->whereNotNull($column)
+        ->where($column, '!=', '')
+        ->latest('id')
+        ->value($column);
+    }
 }
