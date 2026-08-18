@@ -6,15 +6,15 @@ use App\Helpers\FileSystem;
 use App\Models\AiAnalysisResult;
 use App\Models\Doctor;
 use App\Services\AiAnalysisBillingService;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Exception;
 use Throwable;
 
 class AiAnalysisJob implements ShouldQueue
@@ -85,7 +85,7 @@ class AiAnalysisJob implements ShouldQueue
 
                 Log::info('AI Clean-up executed via FileSystem: Deleted failed job files.', [
                     'patient_id' => $this->jobData['patient_id'],
-                    'deleted_paths' => $filePathsToDelete
+                    'deleted_paths' => $filePathsToDelete,
                 ]);
             }
         }

@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function () {
             Route::get('plans', 'index')->name('plans');
         });
 
-        Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function(){
+        Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function () {
             Route::get('', 'index')->name('index');
             Route::post('', 'store')->name('store')->middleware('check-ai-access');
             Route::get('{patient}/edit', 'edit')->name('edit');

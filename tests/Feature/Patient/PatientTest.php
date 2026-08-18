@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->doctorUser->doctor->patients()->attach([
         $this->patientUser->patient->id,
         $this->stablePatient->patient->id,
-        $this->criticalPatient->patient->id
+        $this->criticalPatient->patient->id,
     ]);
     $this->stablePatient->patient->update(['status' => 'stable']);
     $this->criticalPatient->patient->update(['status' => 'critical']);
@@ -47,11 +47,11 @@ it('gets patients list', function () {
                     'age',
                     'status',
                     'ai_insight',
-                ]
+                ],
             ],
             'links',
-            'meta'
-        ]
+            'meta',
+        ],
     ]);
 });
 
@@ -174,10 +174,10 @@ it('it returns patient data for editing', function () {
                     'id',
                     'type',
                     'name',
-                    'url'
-                ]
-            ]
-        ]
+                    'url',
+                ],
+            ],
+        ],
     ]);
 });
 
@@ -214,7 +214,7 @@ it('allows doctor to delete their patient', function () {
     $response->assertStatus(200);
     $this->assertSoftDeleted('patients', ['id' => $this->patientUser->patient->id]);
     $response->assertJson([
-        'message' => 'Patient deleted successfully.'
+        'message' => 'Patient deleted successfully.',
     ]);
 });
 

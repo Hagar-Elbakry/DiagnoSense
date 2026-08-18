@@ -81,11 +81,12 @@ class Doctor extends Model
         $status = $this->currentSubscriptionStatus();
         if ($status->mode === 'pay-per-use') {
             return true;
-        } elseif($status->mode === 'subscription' && ($status->status === 'active' || $status->status === 'cancelled')) {
+        } elseif ($status->mode === 'subscription' && ($status->status === 'active' || $status->status === 'cancelled')) {
             $features = $status->subscription->plan->features;
+
             return in_array($featureName, $features ?? []);
         }
-        
+
         return false;
     }
 }

@@ -73,9 +73,9 @@ it('update analysis result when AI response successfully', function () {
         ['condition' => 'Condition 2', 'probability' => 0.6, 'status' => 'Negative', 'clinical_reasoning' => 'Clinical Reasons 2'],
     ]);
     assertKeyPointsStored([
-        ['priority' => 'high', 'title' => 'High Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1','Evidence 2']],
-        ['priority' => 'medium', 'title' => 'Medium Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1','Evidence 2']],
-        ['priority' => 'low', 'title' => 'Low Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1','Evidence 2']],
+        ['priority' => 'high', 'title' => 'High Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1', 'Evidence 2']],
+        ['priority' => 'medium', 'title' => 'Medium Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1', 'Evidence 2']],
+        ['priority' => 'low', 'title' => 'Low Priority Alert 1', 'insight' => 'Insight 1', 'evidence' => ['Evidence 1', 'Evidence 2']],
     ]);
 });
 

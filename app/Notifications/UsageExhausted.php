@@ -11,7 +11,6 @@ class UsageExhausted extends Notification implements ShouldBroadcast
 {
     use Queueable;
 
-
     /**
      * Get the notification's delivery channels.
      *

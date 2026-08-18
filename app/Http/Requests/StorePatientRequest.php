@@ -24,7 +24,7 @@ class StorePatientRequest extends FormRequest
                 'bail',
                 Rule::unique('users', 'contact'),
             ],
-            'date_of_birth' => ['required', 'date','before_or_equal:today'],
+            'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
             'gender' => ['required', 'string', 'in:male,female'],
             'national_id' => ['nullable', 'digits:14', 'unique:patients,national_id'],
             'is_smoker' => ['nullable', 'boolean'],

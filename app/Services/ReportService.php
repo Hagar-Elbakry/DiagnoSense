@@ -5,12 +5,11 @@ namespace App\Services;
 use App\Helpers\FileSystem;
 use App\Models\Patient;
 use App\Models\Report;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Str;
 
 class ReportService
 {
-
     public function getPathsForAI(array $reportsTypes, array $data, Patient $patient, array $pathsForAI): array
     {
         try {
@@ -56,6 +55,7 @@ class ReportService
             ];
             $pathsForAI[$type][] = $filePath;
         }
+
         return [$pathsForAI, $reportsToInsert];
     }
 }

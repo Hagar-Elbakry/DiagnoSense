@@ -6,7 +6,6 @@ use App\Notifications\PayPerUseActivated;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Support\Facades\Notification;
 
-
 beforeEach(function () {
     Notification::fake();
     $this->seed(PlanSeeder::class);

@@ -34,7 +34,7 @@ class UpdatePatientRequest extends FormRequest
                 Rule::unique('users', 'contact')->ignore($patient?->user_id),
             ],
 
-            'date_of_birth' => ['required', 'date','before_or_equal:today'],
+            'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
             'gender' => ['required', 'string', 'in:male,female'],
 
             'national_id' => ['nullable', 'string', 'max:14', Rule::unique('patients')->ignore($patient?->id)],
@@ -58,6 +58,7 @@ class UpdatePatientRequest extends FormRequest
         ];
 
     }
+
     public function messages(): array
     {
         return [

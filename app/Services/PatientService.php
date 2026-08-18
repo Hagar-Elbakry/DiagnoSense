@@ -1,27 +1,26 @@
-<?php 
+<?php
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
-use App\Models\Patient;
-use App\Models\Doctor;
-use App\Models\AiAnalysisResult;
-use App\Models\MedicalHistory;
-use Illuminate\Support\Str;
 use App\Jobs\AiAnalysisJob;
 use App\Jobs\ComparativeAnalysis;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use App\Services\SubscriptionService;
+use App\Models\AiAnalysisResult;
+use App\Models\Doctor;
+use App\Models\MedicalHistory;
+use App\Models\Patient;
+use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
-class PatientService 
+class PatientService
 {
     public function __construct(
         protected ReportService $reportService,
         protected SubscriptionService $subscriptionService
-    ){}
+    ) {}
 
     public function getPaginatedPatients(Doctor $doctor, array $params): LengthAwarePaginator
     {
@@ -32,7 +31,7 @@ class PatientService
             ->where('doctor_patient.doctor_id', $doctor->id)
             ->whereNull('patients.deleted_at');
 
-            $query->when(! empty($params['search']), function ($q) use ($params) {
+        $query->when(! empty($params['search']), function ($q) use ($params) {
             $term = $params['search'];
             $q->where(function ($sub) use ($term) {
                 if (is_numeric($term)) {
@@ -107,7 +106,7 @@ class PatientService
                 'date_of_birth',
                 'national_id',
             ]);
-            
+
             if (! empty($patientData)) {
                 $patient->update($patientData);
             }
@@ -230,7 +229,7 @@ class PatientService
         });
     }
 
-    private function runAiAnalysis(Doctor $doctor, Patient $patient, array $newPaths = [], bool $isReAnalysis = false,bool $isFromUpdate = false): void
+    private function runAiAnalysis(Doctor $doctor, Patient $patient, array $newPaths = [], bool $isReAnalysis = false, bool $isFromUpdate = false): void
     {
         $this->subscriptionService->validateAiAccess($doctor);
 
@@ -249,7 +248,7 @@ class PatientService
         }
 
         $allPaths = $newPaths;
-        if (empty(array_filter($newPaths)) && !$isFromUpdate) {
+        if (empty(array_filter($newPaths)) && ! $isFromUpdate) {
             $allPaths = $patient->reports->groupBy('type')->map(fn ($group) => $group->pluck('file_path')->toArray())->toArray();
         }
 

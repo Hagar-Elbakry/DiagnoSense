@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\AiAnalysisResult;
 use App\Models\Patient;
 use App\Models\PatientLabResult;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -12,7 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Exception;
 
 class ComparativeAnalysis implements ShouldQueue
 {
@@ -35,25 +35,25 @@ class ComparativeAnalysis implements ShouldQueue
     public function handle(): void
     {
 
-            $response = Http::timeout($this->timeout)->post(config('services.ai.url').'comparative', [
-                'patient_id' => $this->patient->id,
-            ]);
+        $response = Http::timeout($this->timeout)->post(config('services.ai.url').'comparative', [
+            'patient_id' => $this->patient->id,
+        ]);
 
-            if ($response->failed()) {
-                throw new Exception('AI Server error: '.$response->status());
-            }
+        if ($response->failed()) {
+            throw new Exception('AI Server error: '.$response->status());
+        }
 
-            $labResults = $response->json()['data']['lab_results'] ?? [];
-            if (empty($labResults)) {
-                throw new Exception('No lab results found in AI response.');
-            }
+        $labResults = $response->json()['data']['lab_results'] ?? [];
+        if (empty($labResults)) {
+            throw new Exception('No lab results found in AI response.');
+        }
 
-            $dataToInsert = $this->getDataToInsert($labResults);
+        $dataToInsert = $this->getDataToInsert($labResults);
 
-            DB::transaction(function () use ($dataToInsert) {
-                PatientLabResult::insert($dataToInsert);
-                $this->analysis->update(['status' => 'completed']);
-            });
+        DB::transaction(function () use ($dataToInsert) {
+            PatientLabResult::insert($dataToInsert);
+            $this->analysis->update(['status' => 'completed']);
+        });
     }
 
     private function getDataToInsert(mixed $labResults): array
@@ -70,7 +70,7 @@ class ComparativeAnalysis implements ShouldQueue
                 'created_at' => now(),
             ];
         })->toArray();
-        
+
         return $dataToInsert;
     }
 }

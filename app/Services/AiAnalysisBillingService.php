@@ -15,7 +15,7 @@ class AiAnalysisBillingService
     public function handleBilling(Doctor $doctor, AiAnalysisResult $analysisRecord): void
     {
         $status = $doctor->currentSubscriptionStatus();
-        if ($status->mode === 'subscription' && ($status->status === 'active' || $status->status === 'cancelled' )) {
+        if ($status->mode === 'subscription' && ($status->status === 'active' || $status->status === 'cancelled')) {
             $this->handleSubscriptionBilling($status, $doctor);
         } else {
             $this->handlePayPerUseBilling($doctor, $analysisRecord);
