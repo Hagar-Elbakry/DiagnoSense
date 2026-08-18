@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Requests\DeletePatientRequest;
 use App\Http\Requests\GetPatientDataForUpdateRequest;
 use App\Http\Requests\PatientListRequest;
+use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Patient;
 use App\Http\Resources\PatientResource;
 use App\Http\Resources\PatientEditResource;
@@ -76,6 +77,20 @@ class PatientController extends Controller
             Log::error('Error retrieving patient data for edit: '.$e->getMessage(), ['id' => $patient->id]);
 
             return ApiResponse::error(message: 'An error occurred while retrieving patient data for edit.', status: 500);
+        }
+    }
+
+    public function update(UpdatePatientRequest $request, Patient $patient)
+    {
+        try{
+            $doctor = $request->user()->doctor;
+            $this->patientService->update($doctor, $patient, $request->validated());
+
+            return ApiResponse::success(message: 'Patient file updated successfully');
+        } catch(Exception $e) {
+            Log::error('Update Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Update failed: '.$e->getMessage(), status: 500);
         }
     }
 

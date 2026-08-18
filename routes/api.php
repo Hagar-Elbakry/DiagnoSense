@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
             Route::get('', 'index')->name('index');
             Route::post('', 'store')->name('store')->middleware('check-ai-access');
             Route::get('{patient}/edit', 'edit')->name('edit');
+            Route::patch('/{patient}', 'update')->name('update');
             Route::delete('/{patient}', 'destroy')->name('destroy');
         });
     });

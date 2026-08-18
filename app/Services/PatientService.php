@@ -13,11 +13,14 @@ use App\Jobs\AiAnalysisJob;
 use App\Jobs\ComparativeAnalysis;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Services\SubscriptionService;
+use Exception;
 
 class PatientService 
 {
     public function __construct(
-        protected ReportService $reportService
+        protected ReportService $reportService,
+        protected SubscriptionService $subscriptionService
     ){}
 
     public function getPaginatedPatients(Doctor $doctor, array $params): LengthAwarePaginator
@@ -88,6 +91,64 @@ class PatientService
             'medicalHistory',
             'reports',
         ]);
+    }
+
+    public function update(Doctor $doctor, Patient $patient, array $data): void
+    {
+        DB::transaction(function () use ($doctor, $patient, $data) {
+            $userData = $this->only($data, ['name', 'contact']);
+
+            if (! empty($userData)) {
+                $patient->user->update($userData);
+            }
+
+            $patientData = $this->only($data, [
+                'gender',
+                'date_of_birth',
+                'national_id',
+            ]);
+            
+            if (! empty($patientData)) {
+                $patient->update($patientData);
+            }
+
+            $complaintChanged = false;
+
+            $medicalHistoryData = $this->only($data, [
+                'current_complaints',
+                'is_smoker',
+                'chronic_diseases',
+                'previous_surgeries_name',
+                'current_medications',
+                'allergies',
+                'family_history',
+            ]);
+
+            if (! empty($medicalHistoryData)) {
+                $medicalHistory = $patient->medicalHistory()->updateOrCreate(
+                    ['patient_id' => $patient->id],
+                    $medicalHistoryData
+                );
+
+                $complaintChanged = $medicalHistory->wasChanged('current_complaints');
+            }
+
+            $reportsTypes = ['lab', 'radiology', 'medical_history'];
+            $newPathsForAI = ['lab' => [], 'radiology' => [], 'medical_history' => []];
+
+            $newPathsForAI = $this->reportService->getPathsForAI($reportsTypes, $data, $patient, $newPathsForAI);
+            $hasNewFiles = ! empty(array_filter($newPathsForAI));
+
+            if ($hasNewFiles || $complaintChanged) {
+                $this->runAiAnalysis(
+                    doctor: $doctor,
+                    patient: $patient,
+                    newPaths: $newPathsForAI,
+                    isReAnalysis: false,
+                    isFromUpdate: true
+                );
+            }
+        });
     }
 
     public function deletePatient(Patient $patient): bool
@@ -167,5 +228,38 @@ class PatientService
         DB::afterCommit(function () use ($chain) {
             Bus::chain($chain)->dispatch();
         });
+    }
+
+    private function runAiAnalysis(Doctor $doctor, Patient $patient, array $newPaths = [], bool $isReAnalysis = false,bool $isFromUpdate = false): void
+    {
+        $this->subscriptionService->validateAiAccess($doctor);
+
+        if ($isReAnalysis) {
+            $analysisResult = $patient->latestAiAnalysisResult;
+
+            if (! $analysisResult) {
+                throw new Exception('No existing analysis found to upgrade.', 422);
+            }
+
+            $analysisResult->update(['status' => 'processing']);
+        } else {
+            $analysisResult = $patient->latestAiAnalysisResult()->create([
+                'status' => 'processing',
+            ]);
+        }
+
+        $allPaths = $newPaths;
+        if (empty(array_filter($newPaths)) && !$isFromUpdate) {
+            $allPaths = $patient->reports->groupBy('type')->map(fn ($group) => $group->pluck('file_path')->toArray())->toArray();
+        }
+
+        $jobData = $this->getJobData($patient, $doctor, $patient->medicalHistory, $allPaths, $isReAnalysis);
+
+        $this->triggerAnalysisWorkflows($analysisResult, $jobData, $allPaths, $patient);
+    }
+
+    private function only(array $data, array $keys): array
+    {
+        return array_intersect_key($data, array_flip($keys));
     }
 }
