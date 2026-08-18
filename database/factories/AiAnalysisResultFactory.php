@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\AiAnalysisResult;
 use App\Models\Patient;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Patient>
+ * @extends Factory<AiAnalysisResult>
  */
-class PatientFactory extends Factory
+class AiAnalysisResultFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,9 +19,8 @@ class PatientFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->patient(),
-            'national_id' => fake()->unique()->numerify('##############'),
-            'date_of_birth' => fake()->date(),
+            'patient_id' => Patient::factory(),
+            'status' => 'processing',
         ];
     }
 }

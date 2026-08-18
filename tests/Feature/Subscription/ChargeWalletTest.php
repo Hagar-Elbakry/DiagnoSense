@@ -2,11 +2,9 @@
 
 use Illuminate\Support\Facades\Http;
 
-use function Pest\Laravel\actingAs;
-
 beforeEach(function () {
     $this->doctor = createUserWithType('doctor', fake()->unique()->safeEmail());
-    actingAs($this->doctor);
+    $this->actingAs($this->doctor, 'sanctum');
     Http::fake([
         config('services.paymob.base_url').'v1/intention/' => Http::response([
             'client_secret' => 'test-client-secret',

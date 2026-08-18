@@ -4,6 +4,7 @@ use App\Http\Controllers\V1\Auth\AuthenticationController;
 use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
+use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
 use App\Http\Controllers\V1\WalletController;
@@ -51,6 +52,14 @@ Route::prefix('v1')->group(function () {
             Route::get('current', 'show')->name('current');
             Route::patch('cancel', 'update')->name('cancel');
             Route::get('plans', 'index')->name('plans');
+        });
+
+        Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function () {
+            Route::get('', 'index')->name('index');
+            Route::post('', 'store')->name('store')->middleware('check-ai-access');
+            Route::get('{patient}/edit', 'edit')->name('edit');
+            Route::patch('/{patient}', 'update')->name('update');
+            Route::delete('/{patient}', 'destroy')->name('destroy');
         });
     });
 });

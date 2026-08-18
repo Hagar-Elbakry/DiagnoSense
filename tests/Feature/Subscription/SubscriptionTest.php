@@ -6,8 +6,6 @@ use App\Notifications\PayPerUseActivated;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Support\Facades\Notification;
 
-use function Pest\Laravel\actingAs;
-
 beforeEach(function () {
     Notification::fake();
     $this->seed(PlanSeeder::class);
@@ -15,7 +13,7 @@ beforeEach(function () {
     $this->user = createDoctorWithBilling(balance: 80000);
     $this->doctor = $this->user->doctor;
     $this->wallet = $this->doctor->wallet;
-    actingAs($this->user);
+    $this->actingAs($this->user, 'sanctum');
 });
 
 it('returns all available plans successfully', function () {

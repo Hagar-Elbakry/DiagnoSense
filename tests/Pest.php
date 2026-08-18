@@ -4,6 +4,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -94,4 +95,72 @@ function createDoctorWithBilling(string $billingMode = 'pay-per-use', int $balan
     $user->doctor->wallet()->create(['balance' => $balance]);
 
     return $user;
+}
+
+function validPatientData(): array
+{
+    return [
+        'name' => fake()->name(),
+        'contact' => fake()->unique()->safeEmail(),
+        'date_of_birth' => fake()->date(),
+        'gender' => fake()->randomElement(['male', 'female']),
+        'national_id' => fake()->numerify('##############'),
+        'is_smoker' => fake()->boolean(),
+        'chronic_diseases' => ['diabetes', 'hypertension'],
+        'previous_surgeries_name' => fake()->word(),
+        'current_medications' => fake()->word(),
+        'allergies' => fake()->word(),
+        'family_history' => fake()->word(),
+        'lab' => [UploadedFile::fake()->create('lab_results.pdf', 100, 'application/pdf')],
+        'radiology' => [UploadedFile::fake()->create('radiology_report.pdf', 100, 'application/pdf')],
+        'medical_history' => [UploadedFile::fake()->create('medical_history.pdf', 100, 'application/pdf')],
+        'current_complaints' => fake()->word(),
+    ];
+}
+
+function fakeAiResponse(): array
+{
+    return [
+        'key_information' => [
+            'ai_insight' => 'Test AI Insight',
+            'ai_summary' => 'Test AI Summary',
+            'high_priority_alerts' => [
+                [
+                    'title' => 'High Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+            'low_priority_alerts' => [
+                [
+                    'title' => 'Low Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+            'medium_priority_alerts' => [
+                [
+                    'title' => 'Medium Priority Alert 1',
+                    'insight' => 'Insight 1',
+                    'evidence' => ['Evidence 1', 'Evidence 2'],
+                ],
+            ],
+        ],
+        'decision_support' => [
+            [
+                'condition' => 'Condition 1',
+                'probability' => 0.8,
+                'status' => 'Positive',
+                'clinical_reasoning' => 'Clinical Reasons 1',
+            ],
+            [
+                'condition' => 'Condition 2',
+                'probability' => 0.6,
+                'status' => 'Negative',
+                'clinical_reasoning' => 'Clinical Reasons 2',
+            ],
+        ],
+        'message' => 'Analysis completed successfully',
+        'pdf_path' => 'path/to/ocr/report.pdf',
+    ];
 }
