@@ -23,6 +23,15 @@ beforeEach(function () {
     $this->criticalPatient->patient->update(['status' => 'critical']);
     $this->actingAs($this->doctorUser, 'sanctum');
     $this->validPatientData = validPatientData();
+    $this->medicalHistory = MedicalHistory::factory()->create([
+        'patient_id' => $this->patientUser->patient->id,
+    ]);
+    $this->patientUser->patient->reports()->create([
+        'type' => 'lab',
+        'file_name' => 'test_report.pdf',
+        'file_path' => 'reports/test_report.pdf',
+        'mime_type' => 'application/pdf',
+    ]);
 });
 
 it('gets patients list', function () {
@@ -144,6 +153,38 @@ it('if fails validation when contact is already taken', function () {
         'message' => 'Validation Errors',
         'data' => ['contact' => ['The contact has already been taken.']],
     ]);
+});
+
+it('it returns patient data for editing', function () {
+    $response = $this->getJson(route('patients.edit', ['patient' => $this->patientUser->patient->id]));
+    $response->assertStatus(200);
+    $response->assertJsonStructure([
+        'data' => [
+            'id',
+            'personal_info' => [
+                'name',
+                'contact',
+                'date_of_birth',
+                'gender',
+                'national_id',
+            ],
+            'medical_history',
+            'existing_files' => [
+                '*' => [
+                    'id',
+                    'type',
+                    'name',
+                    'url'
+                ]
+            ]
+        ]
+    ]);
+});
+
+it('it denies doctor from getting another doctor patient edit data', function () {
+    $otherDoctor = createDoctorWithBilling();
+    $response = $this->actingAs($otherDoctor, 'sanctum')->getJson(route('patients.edit', ['patient' => $this->patientUser->patient->id]));
+    $response->assertStatus(403);
 });
 
 it('allows doctor to delete their patient', function () {
