@@ -187,6 +187,28 @@ it('it denies doctor from getting another doctor patient edit data', function ()
     $response->assertStatus(403);
 });
 
+it('allows doctor to update patient data', function () {
+    $response = $this->patchJson(route('patients.update', ['patient' => $this->patientUser->patient->id]), [
+        'name' => 'Updated Name',
+        'contact' => 'updated@gmail.com',
+        'date_of_birth' => '1990-01-01',
+        'gender' => 'male',
+    ]);
+    $response->assertStatus(200);
+    $this->assertDatabaseHas('users', [
+        'name' => 'Updated Name',
+        'contact' => 'updated@gmail.com',
+    ]);
+});
+
+it('denies doctor from updating someone else\'s patient data', function () {
+    $otherDoctor = createDoctorWithBilling();
+    $response = $this->actingAs($otherDoctor, 'sanctum')->patchJson(route('patients.update', ['patient' => $this->patientUser->patient->id]), [
+        'name' => 'Updated Name',
+    ]);
+    $response->assertStatus(403);
+});
+
 it('allows doctor to delete their patient', function () {
     $response = $this->actingAs($this->doctorUser, 'sanctum')->deleteJson(route('patients.destroy', ['patient' => $this->patientUser->patient->id]));
     $response->assertStatus(200);
