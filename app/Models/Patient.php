@@ -76,4 +76,9 @@ class Patient extends Model
             ->latest('id')
             ->value($column);
     }
+
+    public function labResults(): HasMany
+    {
+        return $this->hasMany(PatientLabResult::class);
+    }
 }
