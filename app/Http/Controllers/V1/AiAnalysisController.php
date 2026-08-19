@@ -7,9 +7,11 @@ use App\Http\Requests\GetPatientOverviewRequest;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\ApiResponse;
+use App\Http\Resources\DecisionSupportResource;
 use App\Services\AiAnalysisService;
 use App\Http\Resources\PatientOverviewResource;
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class AiAnalysisController extends Controller
 {
@@ -17,7 +19,7 @@ class AiAnalysisController extends Controller
         protected AiAnalysisService $aiAnalysisService
     ){}
 
-    public function overview(GetPatientOverviewRequest $request, Patient $patient)
+    public function overview(GetPatientOverviewRequest $request, Patient $patient): JsonResponse
     {
         try{
             $patient = $this->aiAnalysisService->getPatientOverview($patient);
@@ -30,6 +32,27 @@ class AiAnalysisController extends Controller
 
             return ApiResponse::error(
                 message: 'Failed to retrieve patient data.',
+                status: 500
+            );
+        }
+    }
+
+    public function decisionSupport(Patient $patient): JsonResponse
+    {
+        try{
+            $result = $this->aiAnalysisService->getPatientDecisionSupport($patient);
+            return ApiResponse::success(
+                message: $result['message'],
+                data: [
+                    'still_processing' => $result['data']['still_processing'],
+                    'decisions' => DecisionSupportResource::collection($result['data']['decisions'])
+                ]
+            );
+        } catch(Exception $e) {
+            Log::error("Decision Support Error for Patient {$patient->id}: ".$e->getMessage());
+
+            return ApiResponse::error(
+                message: 'An error occurred while fetching decision support information.',
                 status: 500
             );
         }
