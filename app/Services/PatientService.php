@@ -229,7 +229,7 @@ class PatientService
         });
     }
 
-    private function runAiAnalysis(Doctor $doctor, Patient $patient, array $newPaths = [], bool $isReAnalysis = false, bool $isFromUpdate = false): void
+    public function runAiAnalysis(Doctor $doctor, Patient $patient, array $newPaths = [], bool $isReAnalysis = false, bool $isFromUpdate = false): AiAnalysisResult
     {
         $this->subscriptionService->validateAiAccess($doctor);
 
@@ -255,6 +255,8 @@ class PatientService
         $jobData = $this->getJobData($patient, $doctor, $patient->medicalHistory, $allPaths, $isReAnalysis);
 
         $this->triggerAnalysisWorkflows($analysisResult, $jobData, $allPaths, $patient);
+
+        return $analysisResult;
     }
 
     private function only(array $data, array $keys): array

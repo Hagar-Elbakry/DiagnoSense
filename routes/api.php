@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\V1\AiAnalysisController;
 use App\Http\Controllers\V1\Auth\AuthenticationController;
 use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
@@ -56,10 +57,21 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function () {
             Route::get('', 'index')->name('index');
-            Route::post('', 'store')->name('store')->middleware('check-ai-access');
+            Route::middleware('check-ai-access')->group(function () {
+                Route::post('', 'store')->name('store');
+                Route::post('/{patient}/re-analyze', 'triggerAiAnalysis')->name('re-analyze');
+            });
             Route::get('{patient}/edit', 'edit')->name('edit');
             Route::patch('/{patient}', 'update')->name('update');
             Route::delete('/{patient}', 'destroy')->name('destroy');
+        });
+
+        Route::controller(AiAnalysisController::class)->prefix('patients')->as('patients.')->group(function () {
+            Route::get('/{patient}/overview', 'overview')->name('overview');
+            Route::middleware('can:view,patient')->group(function () {
+                Route::get('/{patient}/decision-support', 'decisionSupport')->name('decision-support');
+                Route::get('/{patient}/comparative-analysis', 'comparativeAnalysis')->name('comparative-analysis');
+            });
         });
     });
 });
