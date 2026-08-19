@@ -57,7 +57,10 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function () {
             Route::get('', 'index')->name('index');
-            Route::post('', 'store')->name('store')->middleware('check-ai-access');
+            Route::middleware('check-ai-access')->group(function(){
+                Route::post('', 'store')->name('store');
+                Route::post('/{patient}/re-analyze', 'triggerAiAnalysis')->name('re-analyze');
+            });
             Route::get('{patient}/edit', 'edit')->name('edit');
             Route::patch('/{patient}', 'update')->name('update');
             Route::delete('/{patient}', 'destroy')->name('destroy');

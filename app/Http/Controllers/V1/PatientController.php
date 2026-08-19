@@ -15,6 +15,7 @@ use App\Models\Patient;
 use App\Services\PatientService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PatientController extends Controller
@@ -60,6 +61,24 @@ class PatientController extends Controller
             Log::error('Patient Store Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating patient.', status: 500);
+        }
+    }
+
+    public function triggerAiAnalysis(Request $request, Patient $patient): JsonResponse
+    {
+        try{
+            $analysis = $this->patientService->runAiAnalysis(doctor: $request->user()->doctor, patient: $patient, isReAnalysis:true);
+            
+            return ApiResponse::success(
+                message: 'AI Is Processing Now Due To Upgrade', 
+                data: [
+                    'analysis_id' => $analysis->id,
+                ]
+            );
+        } catch(Exception $e) {
+            Log::error('AI Analysis Trigger Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'AI Analysis Trigger failed: '.$e->getMessage(), status: 500);
         }
     }
 
