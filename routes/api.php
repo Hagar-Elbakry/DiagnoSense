@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/{patient}/overview', 'overview')->name('overview');
             Route::middleware('can:view,patient')->group(function(){
                 Route::get('/{patient}/decision-support', 'decisionSupport')->name('decision-support');
+                Route::get('/{patient}/comparative-analysis', 'comparativeAnalysis')->name('comparative-analysis');
             });
         });
     });

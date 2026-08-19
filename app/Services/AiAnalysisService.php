@@ -39,6 +39,38 @@ class AiAnalysisService
         ];
     }
 
+    public function getPatientComparativeAnalysis(Patient $patient): array
+    {
+        $latestAnalysis = $patient->latestAiAnalysisResult;
+        $isProcessing = $latestAnalysis?->status === 'processing';
+        $allResults = $patient->labResults()->orderBy('created_at')->get();
+
+        if ($allResults->isEmpty() && !$isProcessing) {
+            return [
+                'message' => 'No comparative analysis data available for this patient.',
+                'data' => [
+                    'still_processing' => false,
+                    'analysis' => [],
+                ],
+            ];
+        }
+
+        $analysisResponse = $this->formatComparativeData($allResults);
+
+        $message = 'Comparative analysis retrieved successfully.';
+        if ($latestAnalysis?->status === 'failed') {
+            $message = 'Note: The AI failed to extract data from the latest reports. Showing historical data only.';
+        }
+
+        return [
+            'message' => $message,
+            'data' => [
+                'still_processing' => $isProcessing,
+                'analysis' => $analysisResponse,
+            ],
+        ];
+    }
+
     private function fetchLatestAnalysisWithDecisions(Patient $patient): ?AiAnalysisResult
     {
         return $patient->latestAiAnalysisResult()->with('decisionSupports')->first();
@@ -97,4 +129,74 @@ class AiAnalysisService
     {
         return $analysis?->decisionSupports->isNotEmpty() ?? false;
     }
+
+    private function formatComparativeData(Collection $labResults): Collection
+    {
+        return $labResults
+        ->groupBy('standard_name')
+        ->map(fn ($testResults, $testName) =>
+            $this->formatTestComparison($testResults, $testName)
+        )
+        ->values();
+    }
+
+    private function formatTestComparison(
+    Collection $testResults,
+    string $testName
+    ): array {
+        $count = $testResults->count();
+        $currentRecord = $testResults->last();
+        $hasPrevious = $count > 1;
+
+        $previousRecord = $hasPrevious
+            ? $testResults->get($count - 2)
+            : $currentRecord;
+
+        $currentValue = (float) $currentRecord->numeric_value;
+        $previousValue = (float) $previousRecord->numeric_value;
+
+        $changeValue = round($currentValue - $previousValue, 2);
+
+        $percentage = $previousValue != 0
+            ? round(($changeValue / $previousValue) * 100, 1)
+            : 0;
+
+        return [
+            'test_name' => $testName,
+            'category' => $currentRecord->category,
+            'unit' => $currentRecord->unit,
+            'comparison' => [
+                'current_value' => $currentValue,
+                'previous_value' => $hasPrevious ? $previousValue : 'Initial',
+                'change_value' => $changeValue,
+                'change_percentage' => $percentage,
+                'trend' => $this->calculateTrend($currentValue, $previousValue),
+                'status' => $currentRecord->status,
+            ],
+            'all_points' => $this->formatHistoricalPoints($testResults),
+        ];
+    }
+
+    private function calculateTrend(float $current, float $previous): string
+    {
+        if ($current > $previous) {
+            return 'up';
+        }
+        if ($current < $previous) {
+            return 'down';
+        }
+
+        return 'stable';
+    }
+
+    private function formatHistoricalPoints(Collection $testResults): Collection
+    {
+        return $testResults->map(fn ($item, $index) => [
+            'visit_label' => 'Visit #'.($index + 1),
+            'value' => (float) $item->numeric_value,
+            'status' => $item->status,
+            'date' => $item->created_at->format('Y-m-d'),
+        ])->values();
+    }
+
 }
