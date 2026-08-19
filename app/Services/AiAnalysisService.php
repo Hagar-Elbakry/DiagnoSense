@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
 use App\Models\AiAnalysisResult;
+use App\Models\Patient;
 use Illuminate\Support\Collection;
 
-class AiAnalysisService 
+class AiAnalysisService
 {
     public function getPatientOverview(Patient $patient): Patient
     {
@@ -28,10 +28,10 @@ class AiAnalysisService
         $decisionsToReturn = $this->resolveDecisionsToReturn(
             $latestAnalysis,
             $oldAnalysis
-    );
+        );
 
         return [
-            'message' => $this->determineStatusMessage($hasCurrentDecisions, $hasOldDecisions, $isStillProcessing, 'decision support',$latestAnalysis?->status ?? 'completed'),
+            'message' => $this->determineStatusMessage($hasCurrentDecisions, $hasOldDecisions, $isStillProcessing, 'decision support', $latestAnalysis?->status ?? 'completed'),
             'data' => [
                 'still_processing' => $isStillProcessing && ! $hasCurrentDecisions,
                 'decisions' => $decisionsToReturn,
@@ -45,7 +45,7 @@ class AiAnalysisService
         $isProcessing = $latestAnalysis?->status === 'processing';
         $allResults = $patient->labResults()->orderBy('created_at')->get();
 
-        if ($allResults->isEmpty() && !$isProcessing) {
+        if ($allResults->isEmpty() && ! $isProcessing) {
             return [
                 'message' => 'No comparative analysis data available for this patient.',
                 'data' => [
@@ -105,7 +105,7 @@ class AiAnalysisService
         return collect();
     }
 
-    private function determineStatusMessage(bool $hasCurrentData, bool $hasOldData, bool $isStillProcessing, string $label,string $status): string
+    private function determineStatusMessage(bool $hasCurrentData, bool $hasOldData, bool $isStillProcessing, string $label, string $status): string
     {
         if ($status === 'failed') {
             return $hasOldData
@@ -133,16 +133,15 @@ class AiAnalysisService
     private function formatComparativeData(Collection $labResults): Collection
     {
         return $labResults
-        ->groupBy('standard_name')
-        ->map(fn ($testResults, $testName) =>
-            $this->formatTestComparison($testResults, $testName)
-        )
-        ->values();
+            ->groupBy('standard_name')
+            ->map(fn ($testResults, $testName) => $this->formatTestComparison($testResults, $testName)
+            )
+            ->values();
     }
 
     private function formatTestComparison(
-    Collection $testResults,
-    string $testName
+        Collection $testResults,
+        string $testName
     ): array {
         $count = $testResults->count();
         $currentRecord = $testResults->last();
@@ -198,5 +197,4 @@ class AiAnalysisService
             'date' => $item->created_at->format('Y-m-d'),
         ])->values();
     }
-
 }

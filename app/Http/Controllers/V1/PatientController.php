@@ -66,16 +66,16 @@ class PatientController extends Controller
 
     public function triggerAiAnalysis(Request $request, Patient $patient): JsonResponse
     {
-        try{
-            $analysis = $this->patientService->runAiAnalysis(doctor: $request->user()->doctor, patient: $patient, isReAnalysis:true);
-            
+        try {
+            $analysis = $this->patientService->runAiAnalysis(doctor: $request->user()->doctor, patient: $patient, isReAnalysis: true);
+
             return ApiResponse::success(
-                message: 'AI Is Processing Now Due To Upgrade', 
+                message: 'AI Is Processing Now Due To Upgrade',
                 data: [
                     'analysis_id' => $analysis->id,
                 ]
             );
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error('AI Analysis Trigger Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'AI Analysis Trigger failed: '.$e->getMessage(), status: 500);

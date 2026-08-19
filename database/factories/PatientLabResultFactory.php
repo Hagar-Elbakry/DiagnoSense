@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Models\AiAnalysisResult;
 use App\Models\Patient;
+use App\Models\PatientLabResult;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PatientLabResult>
+ * @extends Factory<PatientLabResult>
  */
 class PatientLabResultFactory extends Factory
 {

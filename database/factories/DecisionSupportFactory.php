@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\DecisionSupport;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DecisionSupport>
+ * @extends Factory<DecisionSupport>
  */
 class DecisionSupportFactory extends Factory
 {

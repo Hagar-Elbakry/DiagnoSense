@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Storage;
-use App\Models\MedicalHistory;
-use App\Models\Patient;
 use App\Models\AiAnalysisResult;
 use App\Models\DecisionSupport;
+use App\Models\MedicalHistory;
+use App\Models\Patient;
 use App\Models\PatientLabResult;
+use Illuminate\Support\Facades\Storage;
 
-beforeEach(function(){
+beforeEach(function () {
     Storage::fake('azure');
     $this->doctorUser = createDoctorWithBilling();
     $this->patient = Patient::factory()->create();
@@ -35,7 +35,7 @@ it('allows doctor to view overview for their patient', function () {
             'medications',
             'familyHistory',
             'status',
-        ]
+        ],
     ]);
 });
 

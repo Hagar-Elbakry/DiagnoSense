@@ -9,11 +9,11 @@ use App\Models\Doctor;
 use App\Models\MedicalHistory;
 use App\Models\Patient;
 use App\Models\User;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Exception;
 
 class PatientService
 {
@@ -255,6 +255,7 @@ class PatientService
         $jobData = $this->getJobData($patient, $doctor, $patient->medicalHistory, $allPaths, $isReAnalysis);
 
         $this->triggerAnalysisWorkflows($analysisResult, $jobData, $allPaths, $patient);
+
         return $analysisResult;
     }
 

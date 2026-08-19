@@ -57,7 +57,7 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(PatientController::class)->prefix('patients')->as('patients.')->group(function () {
             Route::get('', 'index')->name('index');
-            Route::middleware('check-ai-access')->group(function(){
+            Route::middleware('check-ai-access')->group(function () {
                 Route::post('', 'store')->name('store');
                 Route::post('/{patient}/re-analyze', 'triggerAiAnalysis')->name('re-analyze');
             });
@@ -66,9 +66,9 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{patient}', 'destroy')->name('destroy');
         });
 
-        Route::controller(AiAnalysisController::class)->prefix('patients')->as('patients.')->group(function(){
+        Route::controller(AiAnalysisController::class)->prefix('patients')->as('patients.')->group(function () {
             Route::get('/{patient}/overview', 'overview')->name('overview');
-            Route::middleware('can:view,patient')->group(function(){
+            Route::middleware('can:view,patient')->group(function () {
                 Route::get('/{patient}/decision-support', 'decisionSupport')->name('decision-support');
                 Route::get('/{patient}/comparative-analysis', 'comparativeAnalysis')->name('comparative-analysis');
             });
