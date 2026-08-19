@@ -5,6 +5,7 @@ use App\Models\MedicalHistory;
 use App\Models\Patient;
 use App\Models\AiAnalysisResult;
 use App\Models\DecisionSupport;
+use App\Models\PatientLabResult;
 
 beforeEach(function(){
     Storage::fake('azure');
@@ -100,4 +101,29 @@ it('shows historical decisions while new analysis is processing', function () {
         ->assertJsonPath('data.still_processing', true)
         ->assertJsonPath('message', 'Showing old decision support. Some files are still being processed.')
         ->assertJsonFragment(['condition' => 'Old Condition']);
+});
+
+it('calculates trends and percentages correctly for multiple lab results', function () {
+    PatientLabResult::factory()->create([
+        'patient_id' => $this->patient->id,
+        'standard_name' => 'Hemoglobin',
+        'numeric_value' => '10',
+        'created_at' => now()->subDays(2),
+    ]);
+
+    PatientLabResult::factory()->create([
+        'patient_id' => $this->patient->id,
+        'standard_name' => 'Hemoglobin',
+        'numeric_value' => '12',
+        'created_at' => now(),
+    ]);
+
+    $response = $this->getJson(route('patients.comparative-analysis', $this->patient));
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.analysis.0.test_name', 'Hemoglobin')
+        ->assertJsonPath('data.analysis.0.comparison.current_value', 12)
+        ->assertJsonPath('data.analysis.0.comparison.previous_value', 10)
+        ->assertJsonPath('data.analysis.0.comparison.change_percentage', 20)
+        ->assertJsonPath('data.analysis.0.comparison.trend', 'up');
 });
