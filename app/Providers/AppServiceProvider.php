@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
 use Symfony\Component\Mailer\Transport\Dsn;
+use App\Models\Patient;
+use App\Models\KeyPoint;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,5 +44,8 @@ class AppServiceProvider extends ServiceProvider
                 Dsn::fromString(config('services.brevo.dsn'))
             );
         });
+
+        Route::model('patient', Patient::class);
+        Route::model('$key_point', KeyPoint::class);
     }
 }
