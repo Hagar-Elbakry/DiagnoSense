@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
-use App\Models\PatientIngestion;
 use App\Jobs\IngestPatientJob;
 use App\Models\Doctor;
-use App\Services\AiGatewayService;
+use App\Models\Patient;
+use App\Models\PatientIngestion;
 
 class ChatbotService
 {
     public function __construct(
         private AiGatewayService $aiGatewayService
-    ){}
+    ) {}
 
     public function ask(string $question, Patient $patient, Doctor $doctor): array
     {

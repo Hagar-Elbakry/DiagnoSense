@@ -7,9 +7,9 @@ use App\Events\ChatbotAnswerReady;
 use App\Models\Patient;
 use App\Models\PatientIngestion;
 use App\Services\AiGatewayService;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Exception;
 
 class IngestPatientJob implements ShouldQueue
 {
