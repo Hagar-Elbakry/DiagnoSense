@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use App\Helpers\ApiResponse;
 use App\Http\Requests\DeleteKeyInfoRequest;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\PatientKeyInfoResource;
 use App\Http\Resources\KeyPointResource;
 use App\Models\KeyPoint;
 use Exception;
@@ -19,6 +20,25 @@ class KeyPointController extends Controller
     public function __construct(
         protected KeyPointService $keyPointService
     ){}
+
+    public function index(Patient $patient): JsonResponse
+    {
+        try{
+            $result = $this->keyPointService->getPatientKeyInfo($patient);
+
+            return ApiResponse::success(
+                message: $result['message'],
+                data: new PatientKeyInfoResource($result['data']),
+            );
+        } catch(Exception $e) {
+            Log::error("Error retrieving key info for Patient {$patient->id}: ".$e->getMessage());
+
+            return ApiResponse::error(
+                message: 'An error occurred while fetching key information.',
+                status: 500
+            );
+        }
+    }
 
     public function store(StoreManualNoteRequest $request, Patient $patient): JsonResponse
     {
