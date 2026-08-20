@@ -5,6 +5,7 @@ use App\Http\Controllers\V1\Auth\AuthenticationController;
 use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
+use App\Http\Controllers\V1\ChatbotController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
@@ -73,6 +74,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{patient}/comparative-analysis', 'comparativeAnalysis')->name('comparative-analysis');
             });
         });
+
+        Route::post('patients/{patient}/chatbot/ask', ChatbotController::class)->name('chatbot.ask')->middleware('check-ai-access');
     });
 });
 
