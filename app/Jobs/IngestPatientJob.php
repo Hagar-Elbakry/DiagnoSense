@@ -6,7 +6,7 @@ use App\Events\ChatbotAnswerFailed;
 use App\Events\ChatbotAnswerReady;
 use App\Models\Patient;
 use App\Models\PatientIngestion;
-use App\Services\AIGatewayService;
+use App\Services\AiGatewayService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Exception;
@@ -24,7 +24,7 @@ class IngestPatientJob implements ShouldQueue
         public string $question
     ) {}
 
-    public function handle(AIGatewayService $aiGatewayService): void
+    public function handle(AiGatewayService $aiGatewayService): void
     {
         try {
             $aiGatewayService->ingest($this->patient);

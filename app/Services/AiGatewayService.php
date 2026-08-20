@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Http;
 
-class AIGatewayService
+class AiGatewayService
 {
     public function ingest(Patient $patient): void
     {

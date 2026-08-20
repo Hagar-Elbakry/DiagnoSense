@@ -6,11 +6,12 @@ use App\Models\Patient;
 use App\Models\PatientIngestion;
 use App\Jobs\IngestPatientJob;
 use App\Models\Doctor;
+use App\Services\AiGatewayService;
 
 class ChatbotService
 {
     public function __construct(
-        private AIGatewayService $aiGatewayService
+        private AiGatewayService $aiGatewayService
     ){}
 
     public function ask(string $question, Patient $patient, Doctor $doctor): array
