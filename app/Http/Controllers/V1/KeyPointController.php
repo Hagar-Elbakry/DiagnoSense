@@ -8,8 +8,10 @@ use App\Models\Patient;
 use App\Services\KeyPointService;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\ApiResponse;
+use App\Http\Requests\DeleteKeyInfoRequest;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\KeyPointResource;
+use App\Models\KeyPoint;
 use Exception;
 
 class KeyPointController extends Controller
@@ -32,6 +34,19 @@ class KeyPointController extends Controller
             Log::error('Error adding manual note: '.$e->getMessage());
 
             return ApiResponse::error(message: 'Error while adding manual note', status: 500);
+        }
+    }
+
+    public function destroy(DeleteKeyInfoRequest $request, Patient $patient, KeyPoint $key_point): JsonResponse
+    {
+        try{
+            $this->keyPointService->deleteKeyPoint($key_point);
+
+            return ApiResponse::success(message: 'Key point deleted successfully');
+        } catch(Exception $e) {
+            Log::error('Error deleting key point: '.$e->getMessage(), ['id' => $key_point->id]);
+
+            return ApiResponse::error(message: 'Error while deleting key point', status: 500);
         }
     }
 }

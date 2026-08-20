@@ -21,4 +21,9 @@ class KeyPointService
             'is_ai_generated' => false,
         ]);
     }
+
+    public function deleteKeyPoint(KeyPoint $key_point): void
+    {
+        $key_point->delete();
+    }
 }
