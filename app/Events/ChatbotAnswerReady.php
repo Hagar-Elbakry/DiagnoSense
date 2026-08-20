@@ -30,7 +30,7 @@ class ChatbotAnswerReady implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('chatbot-answer.'.$this->doctorId . '.' . $this->patientId),
+            new PrivateChannel('chatbot-answer.'.$this->doctorId.'.'.$this->patientId),
         ];
     }
 

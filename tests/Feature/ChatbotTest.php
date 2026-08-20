@@ -32,7 +32,7 @@ beforeEach(function () {
             'Comparative Analysis',
             'Decision Support',
             'DiagnoBot',
-        ]
+        ],
     ]);
     $this->subscription = Subscription::create([
         'doctor_id' => $this->doctor->doctor->id,
@@ -44,9 +44,9 @@ beforeEach(function () {
     ]);
     Queue::fake();
     Http::fake([
-        config('services.ai.url') . '/query' => Http::response([
+        config('services.ai.url').'/query' => Http::response([
             'answer' => 'This is a test answer from the AI.',
-        ])
+        ]),
     ]);
 });
 
@@ -71,7 +71,7 @@ it('returns chatbot answer when patient data is already ingested', function () {
     $response->assertStatus(200);
     $response->assertJsonStructure([
         'message',
-        'data'
+        'data',
     ]);
 });
 
@@ -84,7 +84,7 @@ it('denies chatbot access when doctor plan does not include DiagnoBot feature', 
         'features' => [
             'Key Important Information',
             'Comparative Analysis',
-        ]
+        ],
     ]);
     $this->subscription->plan_id = $plan->id;
     $this->subscription->save();
