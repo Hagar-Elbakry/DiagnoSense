@@ -21,6 +21,78 @@ beforeEach(function(){
     ]);
 });
 
+it('can get analysis with key points', function(){
+        $response = $this->getJson(route('patients.key-points.index', $this->patient));
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'still_processing',
+                'ocr_files',
+                'key_points' => [
+                    'high' => [
+                        '*' => [
+                            'id',
+                            'priority',
+                            'title',
+                            'insight',
+                            'evidence',
+                            'is_ai_generated',
+                            'date'
+                        ]
+                    ],
+                    'medium' => [
+                        '*' => [
+                            'id',
+                            'priority',
+                            'title',
+                            'insight',
+                            'evidence',
+                            'is_ai_generated',
+                            'date'
+                        ]
+                    ],
+                    'low' => [
+                        '*' => [
+                            'id',
+                            'priority',
+                            'title',
+                            'insight',
+                            'evidence',
+                            'is_ai_generated',
+                            'date'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+});
+
+it('returns empty key points when no analysis exists', function(){
+    $otherPatient = Patient::factory()->create();
+    $otherPatient->doctors()->attach($this->doctorUser->doctor->id);
+    $response = $this->getJson(route('patients.key-points.index', $otherPatient));
+    $response->assertStatus(200);
+    $response->assertJsonCount(0, 'data.key_points.high');
+    $response->assertJsonCount(0, 'data.key_points.medium');
+    $response->assertJsonCount(0, 'data.key_points.low');
+});
+
+it('returns still processing when analysis is running', function () {
+    $this->analysis->update([
+        'status' => 'processing',
+    ]);
+    $this->keyPoint->delete();
+    $response = $this->getJson(route('patients.key-points.index', $this->patient));
+    $response->assertStatus(200)
+        ->assertJsonPath('data.still_processing', true);
+});
+
+it('denies unauthorized doctor from getting key points', function () {
+    $otherDoctor = createDoctorWithBilling();
+    $response = $this->actingAs($otherDoctor, 'sanctum')->getJson(route('patients.key-points.index', $this->patient));
+    $response->assertStatus(403);
+});
+
 it('can add a new manual note successfully', function () {
 
     AiAnalysisResult::factory()->create([
