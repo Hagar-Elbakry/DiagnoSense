@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Helpers\ApiResponse;
+use App\Models\KeyPoint;
+use App\Models\Patient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
 use Symfony\Component\Mailer\Transport\Dsn;
@@ -41,5 +44,8 @@ class AppServiceProvider extends ServiceProvider
                 Dsn::fromString(config('services.brevo.dsn'))
             );
         });
+
+        Route::model('patient', Patient::class);
+        Route::model('$key_point', KeyPoint::class);
     }
 }
