@@ -13,8 +13,7 @@ class DeleteKeyInfoRequest extends FormRequest
     {
         $doctor = $this->user()->doctor;
         $keyPoint = $this->route('key_point');
-        if(!$doctor || ! $keyPoint)
-        {
+        if (! $doctor || ! $keyPoint) {
             return false;
         }
 

@@ -77,7 +77,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('patients/{patient}/chatbot/ask', ChatbotController::class)->name('chatbot.ask')->middleware('check-ai-access');
-        
+
         Route::apiResource('patients.key-points', KeyPointController::class)
             ->only(['index', 'store', 'update', 'destroy'])
             ->shallow()->middlewareFor('index', 'can:view,patient');

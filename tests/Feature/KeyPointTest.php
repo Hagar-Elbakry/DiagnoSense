@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\AiAnalysisResult;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Patient;
 use App\Models\KeyPoint;
+use App\Models\Patient;
+use Illuminate\Support\Facades\Storage;
 
-beforeEach(function(){
+beforeEach(function () {
     Storage::fake('azure');
     $this->doctorUser = createDoctorWithBilling();
     $this->patient = Patient::factory()->create();
@@ -21,53 +21,53 @@ beforeEach(function(){
     ]);
 });
 
-it('can get analysis with key points', function(){
-        $response = $this->getJson(route('patients.key-points.index', $this->patient));
-        $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'data' => [
-                'still_processing',
-                'ocr_files',
-                'key_points' => [
-                    'high' => [
-                        '*' => [
-                            'id',
-                            'priority',
-                            'title',
-                            'insight',
-                            'evidence',
-                            'is_ai_generated',
-                            'date'
-                        ]
+it('can get analysis with key points', function () {
+    $response = $this->getJson(route('patients.key-points.index', $this->patient));
+    $response->assertStatus(200);
+    $response->assertJsonStructure([
+        'data' => [
+            'still_processing',
+            'ocr_files',
+            'key_points' => [
+                'high' => [
+                    '*' => [
+                        'id',
+                        'priority',
+                        'title',
+                        'insight',
+                        'evidence',
+                        'is_ai_generated',
+                        'date',
                     ],
-                    'medium' => [
-                        '*' => [
-                            'id',
-                            'priority',
-                            'title',
-                            'insight',
-                            'evidence',
-                            'is_ai_generated',
-                            'date'
-                        ]
+                ],
+                'medium' => [
+                    '*' => [
+                        'id',
+                        'priority',
+                        'title',
+                        'insight',
+                        'evidence',
+                        'is_ai_generated',
+                        'date',
                     ],
-                    'low' => [
-                        '*' => [
-                            'id',
-                            'priority',
-                            'title',
-                            'insight',
-                            'evidence',
-                            'is_ai_generated',
-                            'date'
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+                ],
+                'low' => [
+                    '*' => [
+                        'id',
+                        'priority',
+                        'title',
+                        'insight',
+                        'evidence',
+                        'is_ai_generated',
+                        'date',
+                    ],
+                ],
+            ],
+        ],
+    ]);
 });
 
-it('returns empty key points when no analysis exists', function(){
+it('returns empty key points when no analysis exists', function () {
     $otherPatient = Patient::factory()->create();
     $otherPatient->doctors()->attach($this->doctorUser->doctor->id);
     $response = $this->getJson(route('patients.key-points.index', $otherPatient));
@@ -147,9 +147,9 @@ it('fails to add a manual note when insight is missing', function () {
         );
 });
 
-it('can update key point', function(){
+it('can update key point', function () {
     $response = $this->patchJson(route('key-points.update', $this->keyPoint), [
-        'insight' => 'Updated insight'
+        'insight' => 'Updated insight',
     ]);
 
     $response->assertStatus(200)
@@ -167,7 +167,7 @@ it('can update key point', function(){
 it('can delete key point successfully', function () {
 
     $response = $this->deleteJson(
-        route('key-points.destroy',  $this->keyPoint),
+        route('key-points.destroy', $this->keyPoint),
     );
 
     $response->assertStatus(200)

@@ -2,19 +2,17 @@
 
 namespace App\Services;
 
+use App\Helpers\FileSystem;
 use App\Models\KeyPoint;
 use App\Models\Patient;
-use Illuminate\Support\Collection;
-use App\Models\AiAnalysisResult;
-use App\Helpers\FileSystem;
-use App\Services\AiAnalysisService;
 use Exception;
+use Illuminate\Support\Collection;
 
 class KeyPointService
 {
     public function __construct(
         protected AiAnalysisService $aiAnalysisService
-    ){}
+    ) {}
 
     public function getPatientKeyInfo(Patient $patient): array
     {
@@ -32,7 +30,7 @@ class KeyPointService
         $allKeyPoints = $this->extractAndSortKeyPoints($analysesWithKeyPoints);
 
         return [
-            'message' => $this->aiAnalysisService->determineStatusMessage($hasCurrentData, $hasOldData, $isStillProcessing, 'key points',$latestAnalysis?->status ?? 'completed'),
+            'message' => $this->aiAnalysisService->determineStatusMessage($hasCurrentData, $hasOldData, $isStillProcessing, 'key points', $latestAnalysis?->status ?? 'completed'),
             'data' => [
                 'still_processing' => $isStillProcessing && ! $hasCurrentData,
                 'ocr_files' => $ocrFiles,
@@ -92,9 +90,9 @@ class KeyPointService
     private function groupKeyPointsByPriority(Collection $allKeyPoints): array
     {
         return [
-        'high' => $allKeyPoints->where('priority', 'high')->values(),
-        'medium' => $allKeyPoints->where('priority', 'medium')->values(),
-        'low' => $allKeyPoints->where('priority', 'low')->values(),
-    ];
+            'high' => $allKeyPoints->where('priority', 'high')->values(),
+            'medium' => $allKeyPoints->where('priority', 'medium')->values(),
+            'low' => $allKeyPoints->where('priority', 'low')->values(),
+        ];
     }
 }
