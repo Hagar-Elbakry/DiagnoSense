@@ -9,6 +9,7 @@ use App\Services\KeyPointService;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\ApiResponse;
 use App\Http\Requests\DeleteKeyInfoRequest;
+use App\Http\Requests\UpdateKeyPointRequest;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PatientKeyInfoResource;
 use App\Http\Resources\KeyPointResource;
@@ -54,6 +55,20 @@ class KeyPointController extends Controller
             Log::error('Error adding manual note: '.$e->getMessage());
 
             return ApiResponse::error(message: 'Error while adding manual note', status: 500);
+        }
+    }
+
+    public function update(UpdateKeyPointRequest $request, Patient $patient, KeyPoint $key_point): JsonResponse
+    {
+        try {
+            $this->keyPointService->updateKeyPoint($key_point, $request->validated());
+
+            return ApiResponse::success(message: 'Key point updated successfully');
+
+        } catch (Exception $e) {
+            Log::error('Error updating key point: '.$e->getMessage(), ['id' => $key_point->id]);
+
+            return ApiResponse::error(message: 'Error while updating key point', status: 500);
         }
     }
 
