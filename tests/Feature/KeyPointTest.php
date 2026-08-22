@@ -147,6 +147,23 @@ it('fails to add a manual note when insight is missing', function () {
         );
 });
 
+it('can update key point', function(){
+    $response = $this->patchJson(route('key-points.update', $this->keyPoint), [
+        'insight' => 'Updated insight'
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJsonPath(
+            'message',
+            'Key point updated successfully'
+        );
+
+    $this->assertDatabaseHas('key_points', [
+        'id' => $this->keyPoint->id,
+        'insight' => 'Updated insight',
+    ]);
+});
+
 it('can delete key point successfully', function () {
 
     $response = $this->deleteJson(
