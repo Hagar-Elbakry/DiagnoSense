@@ -105,7 +105,7 @@ class AiAnalysisService
         return collect();
     }
 
-    public function determineStatusMessage(bool $hasCurrentData, bool $hasOldData, bool $isStillProcessing, string $label, string $status): string
+    private function determineStatusMessage(bool $hasCurrentData, bool $hasOldData, bool $isStillProcessing, string $label, string $status): string
     {
         if ($status === 'failed') {
             return $hasOldData
