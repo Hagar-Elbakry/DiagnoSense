@@ -85,6 +85,7 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(DashboardController::class)->prefix('dashboard')->as('dashboard.')->group(function(){
             Route::get('/status-distribution', 'statusDistribution')->name('status-distribution');
+            Route::get('/top-diseases', 'topDiseases')->name('top-diseases');
         });
     });
 });
