@@ -6,9 +6,19 @@ use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\Visit;
 use App\Helpers\PushNotification;
+use Illuminate\Support\Collection;
 
 class VisitService
 {
+    public function getVisitDetails(Patient $patient): Collection
+    {
+        return Visit::query()
+            ->whereBelongsTo($patient)
+            ->with(['tasks.visit','medications.visit'])
+            ->latest()
+            ->get();
+    }
+
     public function store(array $data, Patient $patient, Doctor $doctor): Visit
     {
         $status = $data['action'] == 'save' ? 'completed' : 'draft';
