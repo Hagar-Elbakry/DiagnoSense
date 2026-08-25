@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use App\Models\Visit;
 
 class VisitPolicy
 {
@@ -30,5 +31,17 @@ class VisitPolicy
         return $doctor->patients()->where('patients.id', $patient->id)->exists()
             ? Response::allow()
             : Response::deny('You do not have permission to create a visit for this patient.');
+    }
+
+    public function manage(User $user, Visit $visit): Response
+    {
+        $doctor = $user->doctor;
+        if (! $doctor) {
+            return Response::deny('User is not a doctor.');
+        }
+
+        return $doctor->visits()->where('visits.id', $visit->id)->exists()
+            ? Response::allow()
+            : Response::deny('You do not have permission to manage this visit.');
     }
 }
