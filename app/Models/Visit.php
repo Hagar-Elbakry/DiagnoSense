@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Doctor;
 use App\Models\Medication;
 use App\Models\Task;
+use App\Models\Patient;
 
 class Visit extends Model
 {
@@ -38,5 +39,10 @@ class Visit extends Model
     public function tasks():HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
     }
 }
