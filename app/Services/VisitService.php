@@ -40,4 +40,17 @@ class VisitService
 
         return $visit->load('doctor.user');
     }
+
+    public function updateNextVisit(Visit $visit, array $data): void
+    {
+        $visit->update([
+            'next_visit_date' => $data['next_visit_date'],
+        ]);
+        PushNotification::sendToPatient(
+            patient: $visit->patient,
+            type: 'visit',
+            title: __('Upcoming Appointment Scheduled'),
+            body: __('Your next visit is scheduled on: :date', ['date' => $visit->next_visit_date?->format('Y-m-d h:i A')])
+        );
+    }
 }

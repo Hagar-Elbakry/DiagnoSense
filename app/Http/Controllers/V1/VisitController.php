@@ -15,6 +15,7 @@ use App\Models\Visit;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\MedicationResource;
 use App\Http\Requests\GetVisitRequest;
+use App\Http\Requests\UpdateVisitRequest;
 use Exception;
 
 class VisitController extends Controller
@@ -76,6 +77,17 @@ class VisitController extends Controller
             Log::error('Edit Visit Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while fetching visit details.', status: 500);
+        }
+    }
+
+    public function update(UpdateVisitRequest $request, Visit $visit): JsonResponse
+    {
+        try {
+            $this->visitService->updateNextVisit($visit, $request->validated());
+            return ApiResponse::success(message: 'Visit updated successfully.');
+        }catch (Exception $e) {
+            Log::error('Update Visit Error: '.$e->getMessage());
+            return ApiResponse::error(message: 'An error occurred while updating visit.', status: 500);
         }
     }
 }
