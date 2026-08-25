@@ -47,6 +47,11 @@ class Doctor extends Model
         return $this->hasOne(Wallet::class);
     }
 
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
+
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(Subscription::class)

@@ -8,6 +8,7 @@ use App\Http\Requests\DeletePatientRequest;
 use App\Http\Requests\GetPatientDataForUpdateRequest;
 use App\Http\Requests\PatientListRequest;
 use App\Http\Requests\StorePatientRequest;
+use App\Http\Requests\UpdateFcmTokenRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Http\Resources\PatientEditResource;
 use App\Http\Resources\PatientResource;
@@ -129,6 +130,19 @@ class PatientController extends Controller
                 message: 'Failed to delete patient, please try again later.',
                 status: 500
             );
+        }
+    }
+
+    public function updateFcmToken(UpdateFcmTokenRequest $request): JsonResponse
+    {
+        try {
+            $request->user()->update(['fcm_token' => $request->validated()['fcm_token']]);
+
+            return ApiResponse::success(message: 'FCM Token Updated Successfully');
+        } catch (Exception $e) {
+            Log::error('FCM Token Update Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while updating the FCM token.', status: 500);
         }
     }
 }

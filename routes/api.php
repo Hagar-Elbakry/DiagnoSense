@@ -11,6 +11,7 @@ use App\Http\Controllers\V1\KeyPointController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
+use App\Http\Controllers\V1\VisitController;
 use App\Http\Controllers\V1\WalletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -87,6 +88,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/status-distribution', 'statusDistribution')->name('status-distribution');
             Route::get('/top-diseases', 'topDiseases')->name('top-diseases');
         });
+        Route::apiResource('patients.visits', VisitController::class)->only(['index', 'store', 'edit', 'update'])->shallow();
+        Route::patch('/fcm-token', [PatientController::class, 'updateFcmToken'])->name('patients.fcm-token');
     });
 });
 

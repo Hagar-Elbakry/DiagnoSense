@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Patient::class);
     }
+
+    public function routeNotificationForFcm(): ?string
+    {
+        return $this->fcm_token;
+    }
 }
