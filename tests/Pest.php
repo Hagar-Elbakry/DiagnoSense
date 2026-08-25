@@ -3,12 +3,12 @@
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
+use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-use App\Models\Visit;
-use Illuminate\Support\Carbon;
 
 /*
 |--------------------------------------------------------------------------

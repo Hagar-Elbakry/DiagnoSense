@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreNextVisitRequest;
-use App\Models\Patient;
-use Illuminate\Http\JsonResponse;
-use App\Services\VisitService;
 use App\Helpers\ApiResponse;
-use Illuminate\Support\Facades\Log;
-use App\Http\Resources\NextVisitResource;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\GetNextVisitDetailsRequest;
-use App\Models\Visit;
-use App\Http\Resources\TaskResource;
-use App\Http\Resources\MedicationResource;
 use App\Http\Requests\GetVisitRequest;
+use App\Http\Requests\StoreNextVisitRequest;
 use App\Http\Requests\UpdateVisitRequest;
+use App\Http\Resources\MedicationResource;
+use App\Http\Resources\NextVisitResource;
+use App\Http\Resources\TaskResource;
+use App\Models\Patient;
+use App\Models\Visit;
+use App\Services\VisitService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class VisitController extends Controller
 {
@@ -24,7 +24,7 @@ class VisitController extends Controller
         protected VisitService $visitService
     ) {}
 
-        public function index(GetNextVisitDetailsRequest $request, Patient $patient): JsonResponse
+    public function index(GetNextVisitDetailsRequest $request, Patient $patient): JsonResponse
     {
         try {
             $visitDetails = $this->visitService->getVisitDetails($patient);
@@ -39,7 +39,7 @@ class VisitController extends Controller
                 'tasks' => TaskResource::collection($visitDetails->flatMap->tasks),
                 'medications' => MedicationResource::collection($visitDetails->flatMap->medications),
                 'next_visit_id' => $nextVisit?->id,
-                'next_visit_date' =>$nextVisit?->next_visit_date
+                'next_visit_date' => $nextVisit?->next_visit_date
                     ? $nextVisit->next_visit_date->format('D, M j, Y g:i A')
                     : null,
             ];
@@ -69,11 +69,11 @@ class VisitController extends Controller
 
     public function edit(GetVisitRequest $request, Visit $visit): JsonResponse
     {
-        try{
-            return ApiResponse::success(message: 'Next Visit date  retrieved successfully.', data:[
+        try {
+            return ApiResponse::success(message: 'Next Visit date  retrieved successfully.', data: [
                 'next_visit_date' => $visit->next_visit_date->format('Y-m-d H:i:s'),
             ]);
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Edit Visit Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while fetching visit details.', status: 500);
@@ -84,9 +84,11 @@ class VisitController extends Controller
     {
         try {
             $this->visitService->updateNextVisit($visit, $request->validated());
+
             return ApiResponse::success(message: 'Visit updated successfully.');
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Update Visit Error: '.$e->getMessage());
+
             return ApiResponse::error(message: 'An error occurred while updating visit.', status: 500);
         }
     }

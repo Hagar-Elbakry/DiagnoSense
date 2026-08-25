@@ -9,7 +9,6 @@ use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
-
 class PatientNotification extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -30,21 +29,23 @@ class PatientNotification extends Notification implements ShouldQueue
         if (empty($notifiable->fcm_token)) {
             return ['database'];
         }
+
         return [FcmChannel::class, 'database'];
     }
 
     public function toFcm(object $notifiable): FcmMessage
     {
-        return (new FcmMessage())
-        ->notification((new FcmNotification())
-            ->title($this->title)
-            ->body($this->body)
-        )
-        ->data([
-            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-            'type'         => (string) strtoupper($this->type),
-        ]);
+        return (new FcmMessage)
+            ->notification((new FcmNotification)
+                ->title($this->title)
+                ->body($this->body)
+            )
+            ->data([
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                'type' => (string) strtoupper($this->type),
+            ]);
     }
+
     public function toArray(object $notifiable): array
     {
         return [
@@ -53,5 +54,4 @@ class PatientNotification extends Notification implements ShouldQueue
             'description' => $this->body,
         ];
     }
-
 }

@@ -27,7 +27,7 @@ class UpdateVisitRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'next_visit_date' => 'required|date|after:now'
+            'next_visit_date' => 'required|date|after:now',
         ];
     }
 }

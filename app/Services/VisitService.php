@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
-use App\Models\Doctor;
-use App\Models\Visit;
 use App\Helpers\PushNotification;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Visit;
 use Illuminate\Support\Collection;
 
 class VisitService
@@ -14,7 +14,7 @@ class VisitService
     {
         return Visit::query()
             ->whereBelongsTo($patient)
-            ->with(['tasks.visit','medications.visit'])
+            ->with(['tasks.visit', 'medications.visit'])
             ->latest()
             ->get();
     }
@@ -31,10 +31,10 @@ class VisitService
 
         if ($visit->next_visit_date) {
             PushNotification::sendToPatient(
-            patient: $patient,
-            type: 'visit',
-            title: __('Upcoming Appointment Scheduled'),
-            body: __('Your next visit is scheduled on: :date', ['date' => $visit->next_visit_date?->format('Y-m-d h:i A')])
+                patient: $patient,
+                type: 'visit',
+                title: __('Upcoming Appointment Scheduled'),
+                body: __('Your next visit is scheduled on: :date', ['date' => $visit->next_visit_date?->format('Y-m-d h:i A')])
             );
         }
 

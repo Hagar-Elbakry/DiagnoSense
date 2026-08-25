@@ -4,8 +4,8 @@ namespace App\Policies;
 
 use App\Models\Patient;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 use App\Models\Visit;
+use Illuminate\Auth\Access\Response;
 
 class VisitPolicy
 {
@@ -20,7 +20,7 @@ class VisitPolicy
             ? Response::allow()
             : Response::deny('You do not have permission to view visit details for this patient.');
     }
-    
+
     public function store(User $user, Patient $patient): Response
     {
         $doctor = $user->doctor;

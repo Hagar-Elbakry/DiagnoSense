@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Visit;
 
 class Medication extends Model
 {
@@ -21,7 +20,6 @@ class Medication extends Model
     ];
 
     public function visit(): BelongsTo
-
     {
         return $this->belongsTo(Visit::class);
     }

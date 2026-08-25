@@ -8,16 +8,16 @@ use App\Http\Requests\DeletePatientRequest;
 use App\Http\Requests\GetPatientDataForUpdateRequest;
 use App\Http\Requests\PatientListRequest;
 use App\Http\Requests\StorePatientRequest;
+use App\Http\Requests\UpdateFcmTokenRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Http\Resources\PatientEditResource;
 use App\Http\Resources\PatientResource;
 use App\Models\Patient;
 use App\Services\PatientService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Requests\UpdateFcmTokenRequest;
-use Exception;
 
 class PatientController extends Controller
 {
@@ -135,11 +135,13 @@ class PatientController extends Controller
 
     public function updateFcmToken(UpdateFcmTokenRequest $request): JsonResponse
     {
-        try{
+        try {
             $request->user()->update(['fcm_token' => $request->validated()['fcm_token']]);
+
             return ApiResponse::success(message: 'FCM Token Updated Successfully');
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('FCM Token Update Error: '.$e->getMessage());
+
             return ApiResponse::error(message: 'An error occurred while updating the FCM token.', status: 500);
         }
     }

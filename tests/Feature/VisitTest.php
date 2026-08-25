@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Task;
 use App\Models\Medication;
+use App\Models\Task;
 
 beforeEach(function () {
     $userDoctor = createUserWithType('doctor', fake()->unique()->safeEmail());
