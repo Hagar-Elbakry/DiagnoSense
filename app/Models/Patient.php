@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\PatientStatus;
 
 class Patient extends Model
 {
@@ -80,5 +81,10 @@ class Patient extends Model
     public function labResults(): HasMany
     {
         return $this->hasMany(PatientLabResult::class);
+    }
+
+    public static function getStatuses(): array
+    {
+        return PatientStatus::cases();
     }
 }
