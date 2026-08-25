@@ -6,6 +6,7 @@ use App\Http\Controllers\V1\Auth\ContactVerificationController;
 use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
 use App\Http\Controllers\V1\ChatbotController;
+use App\Http\Controllers\V1\DashboardController;
 use App\Http\Controllers\V1\KeyPointController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
@@ -81,6 +82,10 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('patients.key-points', KeyPointController::class)
             ->only(['index', 'store', 'update', 'destroy'])
             ->shallow()->middlewareFor('index', 'can:view,patient');
+
+        Route::controller(DashboardController::class)->prefix('dashboard')->as('dashboard.')->group(function(){
+            Route::get('/status-distribution', 'statusDistribution')->name('status-distribution');
+        });
     });
 });
 
