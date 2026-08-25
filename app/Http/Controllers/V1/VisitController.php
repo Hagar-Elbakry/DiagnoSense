@@ -14,6 +14,7 @@ use App\Http\Requests\GetNextVisitDetailsRequest;
 use App\Models\Visit;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\MedicationResource;
+use App\Http\Requests\GetVisitRequest;
 use Exception;
 
 class VisitController extends Controller
@@ -62,6 +63,19 @@ class VisitController extends Controller
             Log::error('Store Visit Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating visit.', status: 500);
+        }
+    }
+
+    public function edit(GetVisitRequest $request, Visit $visit): JsonResponse
+    {
+        try{
+            return ApiResponse::success(message: 'Next Visit date  retrieved successfully.', data:[
+                'next_visit_date' => $visit->next_visit_date->format('Y-m-d H:i:s'),
+            ]);
+        }catch (Exception $e) {
+            Log::error('Edit Visit Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while fetching visit details.', status: 500);
         }
     }
 }
