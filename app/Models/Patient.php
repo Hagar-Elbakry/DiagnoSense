@@ -58,6 +58,11 @@ class Patient extends Model
         return $this->hasMany(Report::class);
     }
 
+    public function visits(): HasMany
+    {
+        return $this->hasMany(related: Visit::class);
+    }
+
     public function latestAiAnalysisResult(): HasOne
     {
         return $this->hasOne(AiAnalysisResult::class)->latest();

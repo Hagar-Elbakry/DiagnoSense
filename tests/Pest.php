@@ -3,8 +3,10 @@
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
+use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -163,4 +165,14 @@ function fakeAiResponse(): array
         'message' => 'Analysis completed successfully',
         'pdf_path' => 'path/to/ocr/report.pdf',
     ];
+}
+
+function createVisit(Doctor $doctor, Patient $patient, ?Carbon $nextVisitDate = null)
+{
+    return Visit::create([
+        'next_visit_date' => $nextVisitDate ?? now()->addDays(7),
+        'doctor_id' => $doctor->id,
+        'patient_id' => $patient->id,
+        'status' => 'draft',
+    ]);
 }
