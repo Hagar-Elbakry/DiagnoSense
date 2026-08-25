@@ -55,7 +55,6 @@ class DashboardService
         $doctor->loadMissing('user');
 
         $dates = $this->getDateRanges();
-
         $patients = $this->getPatients($doctor);
 
         $patientStats = $this->getPatientStats(
@@ -71,21 +70,34 @@ class DashboardService
 
         $diff = $patientStats['this_month'] - $patientStats['last_month'];
 
-        $growthPercentage = $this->calculateGrowthPercentage(
-            $patientStats['this_month'],
-            $patientStats['last_month'],
-        );
-
         return [
             'doctor_name' => $doctor->user->name,
             'total_patients' => $patientStats['total'],
-            'today_appointments' => $todayVisits,
+            'today_appointments' => $todayVisits->count(),
             'reports_analyzed' => $reportsAnalyzed,
             'last_month_count' => $patientStats['last_month'],
             'this_month_count' => $patientStats['this_month'],
             'diff' => $diff,
-            'growth_percentage' => $growthPercentage,
+            'growth_percentage' => $this->calculateGrowthPercentage(
+                $patientStats['this_month'],
+                $patientStats['last_month'],
+            ),
         ];
+    }
+
+    public function getTodayVisits(Doctor $doctor): Collection
+    {
+        return Visit::where('doctor_id', $doctor->id)
+            ->whereDate('next_visit_date', today())
+            ->where('status', '!=', 'attended')
+            ->with([
+                'patient.user',
+                'patient.latestAiAnalysisResult',
+            ])
+            ->orderBy('next_visit_date')
+            ->get()
+            ->unique('patient_id')
+            ->values();
     }
 
     private function getPatientStatusDistribution(Doctor $doctor): Collection
@@ -140,15 +152,6 @@ class DashboardService
             $patients->pluck('id')
         )
             ->where('status', 'completed')
-            ->count();
-    }
-
-    private function getTodayVisits(Doctor $doctor): int
-    {
-        return Visit::where('doctor_id', $doctor->id)
-            ->whereDate('next_visit_date', today())
-            ->where('status', '!=', 'attended')
-            ->distinct('patient_id')
             ->count();
     }
 

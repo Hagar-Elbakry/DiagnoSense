@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DashboardService;
 use App\Http\Resources\TopDiseaseResource;
 use App\Http\Resources\WidgetDashboardResource;
+use App\Http\Resources\CurrentVisitResource;
+use App\Http\Resources\VisitQueueResource;
 use Exception;
 
 class DashboardController extends Controller
@@ -73,6 +75,45 @@ class DashboardController extends Controller
             Log::error('Error retrieving dashboard summary: '.$e->getMessage(), ['exception' => $e]);
 
             return ApiResponse::error(message: 'Failed to retrieve dashboard summary, please try again later.', status: 500);
+        }
+    }
+
+    public function todayVisits(Request $request): JsonResponse
+    {
+        try {
+            $doctor = $request->user()->doctor;
+
+            $todayVisits = $this->dashboardService->getTodayVisits($doctor);
+            $currentPatient = $todayVisits->first();
+
+            request()->merge([
+                'current_patient_id' => $currentPatient?->patient->id,
+            ]);
+
+            return ApiResponse::success(
+                message: 'Queue retrieved successfully',
+                data: [
+                    'current_attending' => $currentPatient
+                        ? new CurrentVisitResource($currentPatient)
+                        : null,
+
+                    'full_queue_list' => $todayVisits->isNotEmpty()
+                        ? VisitQueueResource::collection($todayVisits->take(5))
+                        : null,
+
+                    'remaining_count_label' => max($todayVisits->count() - 1, 0).' remaining',
+                ]
+            );
+        } catch (Exception $e) {
+            Log::error(
+                "Error retrieving today's visits: {$e->getMessage()}",
+                ['exception' => $e]
+            );
+
+            return ApiResponse::error(
+                message: "Failed to retrieve today's visits, please try again later.",
+                status: 500
+            );
         }
     }
 }
