@@ -83,7 +83,7 @@ Route::prefix('v1')->group(function () {
             ->only(['index', 'store', 'update', 'destroy'])
             ->shallow()->middlewareFor('index', 'can:view,patient');
 
-            
+        Route::apiResource('patients.visits', VisitController::class)->only(['index', 'store', 'edit', 'update'])->shallow();
         Route::patch('/fcm-token', [PatientController::class, 'updateFcmToken'])->name('patients.fcm-token');
     });
 });
