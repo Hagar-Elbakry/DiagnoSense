@@ -9,6 +9,7 @@ use App\Helpers\ApiResponse;
 use Illuminate\Support\Facades\Log;
 use App\Services\DashboardService;
 use App\Http\Resources\TopDiseaseResource;
+use App\Http\Resources\WidgetDashboardResource;
 use Exception;
 
 class DashboardController extends Controller
@@ -54,6 +55,24 @@ class DashboardController extends Controller
             Log::error('Error retrieving top diseases: '.$e->getMessage());
 
             return ApiResponse::error(message: 'Failed to retrieve top diseases', status: 500);
+        }
+    }
+
+        public function summary(Request $request): JsonResponse
+    {
+        try {
+            $doctor = $request->user()->doctor;
+
+            $stats = $this->dashboardService->getSummary($doctor);
+
+            return ApiResponse::success(
+                message: 'Dashboard summary retrieved successfully',
+                data: new WidgetDashboardResource($stats),
+            );
+        } catch (Exception $e) {
+            Log::error('Error retrieving dashboard summary: '.$e->getMessage(), ['exception' => $e]);
+
+            return ApiResponse::error(message: 'Failed to retrieve dashboard summary, please try again later.', status: 500);
         }
     }
 }

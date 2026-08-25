@@ -87,6 +87,7 @@ Route::prefix('v1')->group(function () {
         Route::controller(DashboardController::class)->prefix('dashboard')->as('dashboard.')->group(function(){
             Route::get('/status-distribution', 'statusDistribution')->name('status-distribution');
             Route::get('/top-diseases', 'topDiseases')->name('top-diseases');
+            Route::get('/summary','summary')->name('summary');
         });
         Route::apiResource('patients.visits', VisitController::class)->only(['index', 'store', 'edit', 'update'])->shallow();
         Route::patch('/fcm-token', [PatientController::class, 'updateFcmToken'])->name('patients.fcm-token');
