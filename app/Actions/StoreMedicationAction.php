@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Actions\StoreVisitRequirementAction;
 use App\Helpers\PushNotification;
 use App\Models\Medication;
 use App\Models\Visit;
@@ -13,7 +12,7 @@ class StoreMedicationAction extends StoreVisitRequirementAction
     {
         $visit->load([
             'patient',
-            'doctor.user'
+            'doctor.user',
         ]);
 
         $this->updateVisitIfNeeded($visit, $data);
@@ -26,14 +25,14 @@ class StoreMedicationAction extends StoreVisitRequirementAction
         ]);
         $medication['action'] = $data['action'];
         $medication->setRelation('visit', $visit);
-        
+
         $patient = $visit->patient;
         $doctorName = $visit->doctor->user->name;
         PushNotification::sendToPatient(
-        patient: $patient,
-        type: 'medication',
-        title: __('New Medication Added'),
-        body: __('Dr. :name added a new medication: :med', ['name' => $doctorName, 'med' => $medication->name])
+            patient: $patient,
+            type: 'medication',
+            title: __('New Medication Added'),
+            body: __('Dr. :name added a new medication: :med', ['name' => $doctorName, 'med' => $medication->name])
         );
 
         return $medication;

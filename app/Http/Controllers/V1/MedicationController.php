@@ -10,9 +10,9 @@ use App\Http\Resources\DoctorMedicationResource;
 use App\Models\Medication;
 use App\Models\Visit;
 use App\Services\MedicationService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class MedicationController extends Controller
 {
