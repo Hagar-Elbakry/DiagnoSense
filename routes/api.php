@@ -8,6 +8,7 @@ use App\Http\Controllers\V1\Auth\SocialAuthController;
 use App\Http\Controllers\V1\ChatbotController;
 use App\Http\Controllers\V1\DashboardController;
 use App\Http\Controllers\V1\KeyPointController;
+use App\Http\Controllers\V1\MedicationController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
@@ -93,6 +94,7 @@ Route::prefix('v1')->group(function () {
         });
         Route::apiResource('patients.visits', VisitController::class)->only(['index', 'store', 'edit', 'update'])->shallow();
         Route::apiResource('visits.tasks', TaskController::class)->only(['store', 'destroy'])->shallow();
+        Route::apiResource('visits.medications', MedicationController::class)->only(['store', 'destroy'])->shallow();
         Route::patch('/fcm-token', [PatientController::class, 'updateFcmToken'])->name('patients.fcm-token');
     });
 });
