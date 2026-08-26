@@ -4,8 +4,10 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DeleteMedicationRequest;
 use App\Http\Requests\StoreMedicationRequest;
 use App\Http\Resources\DoctorMedicationResource;
+use App\Models\Medication;
 use App\Models\Visit;
 use App\Services\MedicationService;
 use Illuminate\Http\JsonResponse;
@@ -29,6 +31,19 @@ class MedicationController extends Controller
             Log::error('Store Medication Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating medication.', status: 500);
+        }
+    }
+
+    public function destroy(DeleteMedicationRequest $request, Medication $medication): JsonResponse
+    {
+        try {
+            $this->medicationService->delete($medication);
+
+            return ApiResponse::success(message: 'Medication deleted successfully');
+        } catch (Exception $e) {
+            Log::error('Delete Medication Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while deleting medication.', status: 500);
         }
     }
 }

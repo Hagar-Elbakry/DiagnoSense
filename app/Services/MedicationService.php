@@ -12,4 +12,9 @@ class MedicationService
     {
         return (new StoreMedicationAction)->execute($visit, $data);
     }
+
+    public function delete(Medication $medication): void
+    {
+        $medication->delete();
+    }
 }
