@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Visit;
-use App\Models\Task;
 use App\Actions\StoreTaskAction;
+use App\Models\Task;
+use App\Models\Visit;
 
 class TaskService
 {

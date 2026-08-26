@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\Patient;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Auth\Access\Response;
-use App\Models\Task;
 
 class VisitPolicy
 {

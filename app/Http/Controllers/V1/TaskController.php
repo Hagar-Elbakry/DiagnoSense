@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\V1;
 
-use App\Http\Controllers\Controller;
-use App\Services\TaskService;
-use App\Http\Requests\StoreTaskRequest;
-use App\Models\Visit;
-use Illuminate\Http\JsonResponse;
 use App\Helpers\ApiResponse;
-use Illuminate\Support\Facades\Log;
-use App\Http\Resources\DoctorTaskResource;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteTaskRequest;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Resources\DoctorTaskResource;
 use App\Models\Task;
+use App\Models\Visit;
+use App\Services\TaskService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {

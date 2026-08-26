@@ -4,7 +4,6 @@ namespace App\Actions;
 
 use App\Models\Visit;
 
-
 abstract class StoreVisitRequirementAction
 {
     protected function updateVisitIfNeeded(Visit $visit, array $data): void
