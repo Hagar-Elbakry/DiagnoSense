@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\Task;
 use App\Models\User;
@@ -56,5 +57,17 @@ class VisitPolicy
         return $doctor->visits()->where('visits.id', $task->visit_id)->exists()
             ? Response::allow()
             : Response::deny('You do not have permission to delete this task.');
+    }
+
+    public function deleteMedication(User $user, Medication $medication): Response
+    {
+        $doctor = $user->doctor;
+        if (! $doctor) {
+            return Response::deny('User is not a doctor.');
+        }
+
+        return $doctor->visits()->where('visits.id', $medication->visit_id)->exists()
+            ? Response::allow()
+            : Response::deny('You do not have permission to delete this medication.');
     }
 }
