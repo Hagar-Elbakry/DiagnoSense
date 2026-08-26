@@ -60,7 +60,7 @@ class DashboardController extends Controller
         }
     }
 
-        public function summary(Request $request): JsonResponse
+    public function summary(Request $request): JsonResponse
     {
         try {
             $doctor = $request->user()->doctor;
