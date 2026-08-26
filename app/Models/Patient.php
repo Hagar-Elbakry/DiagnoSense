@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PatientStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -85,5 +86,10 @@ class Patient extends Model
     public function labResults(): HasMany
     {
         return $this->hasMany(PatientLabResult::class);
+    }
+
+    public static function getStatuses(): array
+    {
+        return PatientStatus::cases();
     }
 }
