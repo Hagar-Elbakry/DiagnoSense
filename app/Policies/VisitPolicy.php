@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Patient;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Auth\Access\Response;
@@ -43,5 +44,17 @@ class VisitPolicy
         return $doctor->visits()->where('visits.id', $visit->id)->exists()
             ? Response::allow()
             : Response::deny('You do not have permission to manage this visit.');
+    }
+
+    public function deleteTask(User $user, Task $task): Response
+    {
+        $doctor = $user->doctor;
+        if (! $doctor) {
+            return Response::deny('User is not a doctor.');
+        }
+
+        return $doctor->visits()->where('visits.id', $task->visit_id)->exists()
+            ? Response::allow()
+            : Response::deny('You do not have permission to delete this task.');
     }
 }
