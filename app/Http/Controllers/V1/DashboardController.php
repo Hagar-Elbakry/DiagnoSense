@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CurrentVisitResource;
+use App\Http\Resources\TopDiseaseResource;
+use App\Http\Resources\VisitQueueResource;
+use App\Http\Resources\WidgetDashboardResource;
+use App\Services\DashboardService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Helpers\ApiResponse;
 use Illuminate\Support\Facades\Log;
-use App\Services\DashboardService;
-use App\Http\Resources\TopDiseaseResource;
-use App\Http\Resources\WidgetDashboardResource;
-use App\Http\Resources\CurrentVisitResource;
-use App\Http\Resources\VisitQueueResource;
-use Exception;
 
 class DashboardController extends Controller
 {

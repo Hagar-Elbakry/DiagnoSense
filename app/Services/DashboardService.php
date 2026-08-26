@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\AiAnalysisResult;
 use App\Models\Doctor;
+use App\Models\MedicalHistory;
+use App\Models\Patient;
+use App\Models\Visit;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Models\Patient;
-use App\Models\MedicalHistory;
-use Carbon\Carbon;
-use App\Models\AiAnalysisResult;
-use App\Models\Visit;
 
 class DashboardService
 {
@@ -18,18 +18,19 @@ class DashboardService
         $distribution = $this->getPatientStatusDistribution($doctor);
         $totalPatients = (int) $distribution->sum();
         $pieChartData = collect(Patient::getStatuses())->map(function ($status) use ($distribution, $totalPatients) {
-        $count = (int) ($distribution[$status->value] ?? 0);
+            $count = (int) ($distribution[$status->value] ?? 0);
+
             return [
                 'status' => $status->value,
                 'value' => $count,
-                'percentage' => $totalPatients > 0 ? round(($count / $totalPatients) * 100) : 0
+                'percentage' => $totalPatients > 0 ? round(($count / $totalPatients) * 100) : 0,
             ];
         })->values()->all();
 
         return [
             'total_registered_patients' => $totalPatients,
             'pie_chart_data' => $pieChartData,
-        ];      
+        ];
     }
 
     public function getTopChronicDiseases(Doctor $doctor): Collection

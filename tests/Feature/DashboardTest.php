@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\AiAnalysisResult;
-use App\Models\Patient;
 use App\Models\MedicalHistory;
+use App\Models\Patient;
 
 beforeEach(function () {
     $this->doctorUser = createDoctorWithBilling(billingMode: 'pay-per-use', balance: 5000);
@@ -61,23 +61,23 @@ it('returns correct aggregated top chronic diseases for the bar chart', function
         ->assertJsonFragment(['label' => 'Hypertension', 'value' => 1]);
 });
 
-it('it returns correct widget data for dashboard', function(){
+it('it returns correct widget data for dashboard', function () {
     AiAnalysisResult::create([
         'patient_id' => $this->patient1->id,
-        'status' => 'completed'
+        'status' => 'completed',
     ]);
-    
+
     $this->doctorUser->update([
         'name' => 'Dr. seif',
     ]);
 
     $response = $this->getJson(route('dashboard.summary'));
 
-        $response->assertJsonFragment(['doctor_name' => 'Dr. seif'])
-            ->assertJsonPath('data.widgets.total_patients','3')
-            ->assertJsonFragment(['today_appointments' => 3])
-            ->assertJsonPath('data.widgets.reports_analyzed','1')
-            ->assertJsonPath('data.widgets.monthly_growth.details.growth_rate','100%');
+    $response->assertJsonFragment(['doctor_name' => 'Dr. seif'])
+        ->assertJsonPath('data.widgets.total_patients', '3')
+        ->assertJsonFragment(['today_appointments' => 3])
+        ->assertJsonPath('data.widgets.reports_analyzed', '1')
+        ->assertJsonPath('data.widgets.monthly_growth.details.growth_rate', '100%');
 });
 
 it('allows doctor to view today\'s visits successfully', function () {
@@ -99,18 +99,18 @@ it('allows doctor to view today\'s visits successfully', function () {
                 ],
             ],
             'full_queue_list' => [
-                "*" => [
-                        'id',
-                        'patient_id',
-                        'name',
-                        'age',
-                        'gender',
-                        'appointment_time',
-                        'ai_insight' => [
-                            'summary',
-                        ],
-                        'status_tag',
-                ]
+                '*' => [
+                    'id',
+                    'patient_id',
+                    'name',
+                    'age',
+                    'gender',
+                    'appointment_time',
+                    'ai_insight' => [
+                        'summary',
+                    ],
+                    'status_tag',
+                ],
             ],
             'remaining_count_label',
         ],
