@@ -101,12 +101,13 @@ it('prevents doctor from creating visit for unassigned patient', function () {
 });
 
 it('allows doctor to update visit successfully', function () {
+    $date = now()->addDays(7)->toDateTimeString();
     $response = $this->patch(route('visits.update', ['visit' => $this->visit->id]), [
-        'next_visit_date' => now()->addDays(7)->toDateTimeString(),
+        'next_visit_date' => $date
     ]);
     $response->assertStatus(200);
     $this->assertDatabaseHas('visits', [
         'id' => $this->visit->id,
-        'next_visit_date' => now()->addDays(7)->toDateTimeString(),
+        'next_visit_date' => $date,
     ]);
 });
