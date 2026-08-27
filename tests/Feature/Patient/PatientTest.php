@@ -47,6 +47,8 @@ it('gets patients list', function () {
                     'age',
                     'status',
                     'ai_insight',
+                    'last_visit',
+                    'next_appointment'
                 ],
             ],
             'links',
