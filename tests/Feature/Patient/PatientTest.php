@@ -211,6 +211,26 @@ it('denies doctor from updating someone else\'s patient data', function () {
     $response->assertStatus(403);
 });
 
+it('updates patient status successfully', function () {
+    $this->patchJson(
+        route('patients.update-status', [
+            'patient' => $this->patientUser->patient->id,
+        ]),
+        [
+            'status' => 'critical',
+        ]
+    )
+        ->assertOk()
+        ->assertJson([
+            'success' => true,
+            'message' => 'Patient status updated successfully',
+            'data' => null
+        ]);
+        expect(
+            $this->patientUser->patient->fresh()->status
+        )->toBe('critical');
+});
+
 it('allows doctor to delete their patient', function () {
     $response = $this->actingAs($this->doctorUser, 'sanctum')->deleteJson(route('patients.destroy', ['patient' => $this->patientUser->patient->id]));
     $response->assertStatus(200);
