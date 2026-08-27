@@ -49,6 +49,7 @@ class PatientService
         return $query->with([
             'patient:id,user_id,date_of_birth,status,created_at,national_id',
             'patient.latestAiAnalysisResult:id,patient_id,ai_insight',
+            'patient.latestVisit',
         ])
             ->latest('users.created_at')
             ->paginate(12)
