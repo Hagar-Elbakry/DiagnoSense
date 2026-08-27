@@ -151,6 +151,11 @@ class PatientService
         });
     }
 
+    public function updatePatientStatus(Patient $patient, string $status): void
+    {
+        $patient->update(['status' => $status]);
+    }
+
     public function deletePatient(Patient $patient): bool
     {
         return (bool) $patient->delete();

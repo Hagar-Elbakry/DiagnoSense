@@ -71,6 +71,7 @@ Route::prefix('v1')->group(function () {
             });
             Route::get('{patient}/edit', 'edit')->name('edit');
             Route::patch('/{patient}', 'update')->name('update');
+            Route::patch('{patient}/status', 'updateStatus')->name('update-status');
             Route::delete('/{patient}', 'destroy')->name('destroy');
         });
 

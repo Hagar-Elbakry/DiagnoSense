@@ -10,6 +10,7 @@ use App\Http\Requests\PatientListRequest;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdateFcmTokenRequest;
 use App\Http\Requests\UpdatePatientRequest;
+use App\Http\Requests\UpdatePatientStatusRequest;
 use App\Http\Resources\PatientEditResource;
 use App\Http\Resources\PatientResource;
 use App\Models\Patient;
@@ -110,6 +111,22 @@ class PatientController extends Controller
             Log::error('Update Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'Update failed: '.$e->getMessage(), status: 500);
+        }
+    }
+
+    public function updateStatus(UpdatePatientStatusRequest $request, Patient $patient): JsonResponse
+    {
+        try {
+
+            $this->patientService->updatePatientStatus($patient, $request->validated()['status']);
+
+            return ApiResponse::success(message: 'Patient status updated successfully');
+
+        } catch (Exception $e) {
+
+            Log::error('Patient Status Update Error: '.$e->getMessage(), ['id' => $patient->id]);
+
+            return ApiResponse::error(message: 'Failed to update patient status.', status: 500);
         }
     }
 
