@@ -13,6 +13,7 @@ use App\Http\Controllers\V1\MedicationController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
+use App\Http\Controllers\V1\SupportController;
 use App\Http\Controllers\V1\TaskController;
 use App\Http\Controllers\V1\VisitController;
 use App\Http\Controllers\V1\WalletController;
@@ -104,6 +105,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/profile', 'destroy')->name('profile.destroy');
             Route::patch('/change-password', 'changePassword')->name('password.update');
         });
+
+        Route::post('/support', SupportController::class)->name('support.create');
     });
 });
 
