@@ -5,15 +5,15 @@ namespace App\Http\Controllers\V1;
 use App\Actions\ChangeDoctorPasswordAction;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DeleteDoctorAccountRequest;
 use App\Http\Requests\ChangeDoctorPasswordRequest;
+use App\Http\Requests\DeleteDoctorAccountRequest;
 use App\Http\Requests\UpdateDoctorProfileRequest;
 use App\Http\Resources\DoctorResource;
+use App\Services\DoctorService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Services\DoctorService;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class DoctorProfileController extends Controller
 {

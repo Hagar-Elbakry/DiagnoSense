@@ -24,7 +24,7 @@ it('retrieves doctor profile data', function () {
             'name',
             'contact',
             'speciality',
-        ]
+        ],
     ]);
 });
 
@@ -47,7 +47,7 @@ it('allows updating both name and specialization', function () {
 });
 
 it('allows doctor to delete his account', function () {
-    $response = $this->deleteJson(route('doctor.profile.destroy'),[
+    $response = $this->deleteJson(route('doctor.profile.destroy'), [
         'password' => 'Old_Password_123',
         'password_confirmation' => 'Old_Password_123',
     ]);
@@ -59,7 +59,7 @@ it('allows doctor to delete his account', function () {
 });
 
 it('fails to delete account with wrong password', function () {
-    $response = $this->deleteJson(route('doctor.profile.destroy'),[
+    $response = $this->deleteJson(route('doctor.profile.destroy'), [
         'password' => 'wrong-password',
         'password_confirmation' => 'wrong-password',
     ]);
