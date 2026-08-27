@@ -7,6 +7,7 @@ use App\Http\Controllers\V1\Auth\PasswordController;
 use App\Http\Controllers\V1\Auth\SocialAuthController;
 use App\Http\Controllers\V1\ChatbotController;
 use App\Http\Controllers\V1\DashboardController;
+use App\Http\Controllers\V1\DoctorProfileController;
 use App\Http\Controllers\V1\KeyPointController;
 use App\Http\Controllers\V1\MedicationController;
 use App\Http\Controllers\V1\PatientController;
@@ -96,6 +97,13 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('visits.tasks', TaskController::class)->only(['store', 'destroy'])->shallow();
         Route::apiResource('visits.medications', MedicationController::class)->only(['store', 'destroy'])->shallow();
         Route::patch('/fcm-token', [PatientController::class, 'updateFcmToken'])->name('patients.fcm-token');
+
+        Route::controller(DoctorProfileController::class)->prefix('doctors')->as('doctor.')->group(function () {
+            Route::get('/profile/edit', 'edit')->name('profile.edit');
+            Route::patch('/profile', 'update')->name('profile.update');
+            Route::delete('/profile', 'destroy')->name('profile.destroy');
+            Route::patch('/change-password', 'changePassword')->name('password.update');
+        });
     });
 });
 
