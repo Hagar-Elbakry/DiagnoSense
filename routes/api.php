@@ -100,6 +100,7 @@ Route::prefix('v1')->group(function () {
 
         Route::controller(DoctorProfileController::class)->prefix('doctors')->as('doctor.')->group(function(){
             Route::get('/profile/edit', 'edit')->name('profile.edit');
+            Route::patch('/profile', 'update')->name('profile.update');
         });
     });
 });
