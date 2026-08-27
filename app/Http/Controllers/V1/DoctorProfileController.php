@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DeleteDoctorAccountRequest;
 use App\Http\Requests\UpdateDoctorProfileRequest;
 use App\Http\Resources\DoctorResource;
 use Illuminate\Http\JsonResponse;
@@ -47,5 +48,19 @@ class DoctorProfileController extends Controller
 
             return ApiResponse::error(message: 'Failed to update profile', status: 500);
         }
+    }
+
+    public function destroy(DeleteDoctorAccountRequest $request): JsonResponse
+    {
+        try {
+            $this->doctorService->deleteDoctorAccount($request->user());
+
+            return ApiResponse::success(message: 'Account deleted successfully');
+        } catch (Exception $e) {
+            Log::error('Doctor Profile Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Failed to fetch doctor profile', status: 500);
+        }
+
     }
 }

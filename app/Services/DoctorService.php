@@ -28,4 +28,11 @@ class DoctorService
             }
         });
     }
+
+    public function deleteDoctorAccount(User $user): void
+    {
+        $user->doctor()->delete();
+        $user->tokens()->delete();
+        $user->delete();
+    }
 }
