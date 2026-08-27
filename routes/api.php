@@ -102,6 +102,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/profile/edit', 'edit')->name('profile.edit');
             Route::patch('/profile', 'update')->name('profile.update');
             Route::delete('/profile', 'destroy')->name('profile.destroy');
+            Route::patch('/change-password', 'changePassword')->name('password.update');
         });
     });
 });
