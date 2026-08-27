@@ -92,4 +92,9 @@ class Patient extends Model
     {
         return PatientStatus::cases();
     }
+
+    public function latestVisit(): HasOne
+    {
+        return $this->hasOne(related: Visit::class)->latestOfMany();
+    }
 }
