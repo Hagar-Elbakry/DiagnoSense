@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -96,5 +97,17 @@ class Patient extends Model
     public function latestVisit(): HasOne
     {
         return $this->hasOne(related: Visit::class)->latestOfMany();
+    }
+
+    public function medications(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Medication::class,
+            Visit::class,
+            'patient_id',
+            'visit_id',
+            'id',
+            'id'
+        );
     }
 }
