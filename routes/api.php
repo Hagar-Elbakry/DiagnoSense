@@ -17,6 +17,7 @@ use App\Http\Controllers\V1\SupportController;
 use App\Http\Controllers\V1\TaskController;
 use App\Http\Controllers\V1\VisitController;
 use App\Http\Controllers\V1\WalletController;
+use App\Http\Controllers\V1\WebNotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -108,6 +109,14 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('/support', SupportController::class)->name('support.create');
+
+        Route::controller(WebNotificationController::class)->prefix('notifications')->as('notifications.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/unread-count', 'unreadCount')->name('unreadCount');
+            Route::patch('/{notification}/read', 'read')->name('read');
+            Route::patch('/read-all', 'readAll')->name('readAll');
+            Route::delete('/clear-all', 'clearAll')->name('clearAll');
+        });
     });
 });
 
