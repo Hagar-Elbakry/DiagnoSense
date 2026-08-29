@@ -117,6 +117,10 @@ Route::prefix('v1')->group(function () {
             Route::patch('/read-all', 'readAll')->name('readAll');
             Route::delete('/clear-all', 'clearAll')->name('clearAll');
         });
+
+        Route::controller(TaskController::class)->prefix('tasks')->as('tasks.')->group(function(){
+            Route::get('', 'index')->name('index');
+        });
     });
 });
 
