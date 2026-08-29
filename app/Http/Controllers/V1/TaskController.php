@@ -7,16 +7,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteTaskRequest;
 use App\Http\Requests\GetTaskDetailsRequest;
 use App\Http\Requests\StoreTaskRequest;
-use App\Http\Requests\Task\CompleteTaskRequest;
+use App\Http\Requests\CompleteTaskRequest;
 use App\Http\Resources\DoctorTaskResource;
 use App\Http\Resources\PatientTaskResource;
 use App\Models\Task;
 use App\Models\Visit;
 use App\Services\TaskService;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class TaskController extends Controller
 {
