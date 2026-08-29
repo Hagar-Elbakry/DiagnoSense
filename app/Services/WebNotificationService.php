@@ -22,4 +22,9 @@ class WebNotificationService
     {
         $notification->markAsRead();
     }
+
+    public function readAll(Doctor $doctor): void
+    {
+        $doctor->unreadNotifications->markAsRead();
+    }
 }

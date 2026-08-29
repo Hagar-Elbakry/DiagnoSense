@@ -63,4 +63,17 @@ class WebNotificationController extends Controller
             return ApiResponse::error(message: 'Could not mark notification as read.', status: 500);
         }
     }
+
+    public function readAll(Request $request): JsonResponse
+    {
+        try {
+            $this->webNotificationService->readAll($request->user()->doctor);
+
+            return ApiResponse::success(message: 'All notifications marked as read');
+        } catch (Exception $e) {
+            Log::error('Failed to mark all notifications as read: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Could not mark all notifications as read.', status: 500);
+        }
+    }
 }
