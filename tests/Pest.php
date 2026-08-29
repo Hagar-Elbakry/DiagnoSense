@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -174,5 +176,17 @@ function createVisit(Doctor $doctor, Patient $patient, ?Carbon $nextVisitDate = 
         'doctor_id' => $doctor->id,
         'patient_id' => $patient->id,
         'status' => 'draft',
+    ]);
+}
+
+function createNotification(Doctor $doctor, bool $read = false): DatabaseNotification
+{
+    return DatabaseNotification::create([
+        'id' => Str::uuid(),
+        'type' => 'App\\Notifications\\TestNotification',
+        'notifiable_type' => 'App\\Models\\Doctor',
+        'notifiable_id' => $doctor->id,
+        'data' => ['message' => 'Test notification'],
+        'read_at' => $read ? now() : null,
     ]);
 }
