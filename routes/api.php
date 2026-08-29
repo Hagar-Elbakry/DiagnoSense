@@ -11,6 +11,7 @@ use App\Http\Controllers\V1\DoctorProfileController;
 use App\Http\Controllers\V1\KeyPointController;
 use App\Http\Controllers\V1\MedicalFileController;
 use App\Http\Controllers\V1\MedicationController;
+use App\Http\Controllers\V1\MobileNotificationController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PatientProfileController;
 use App\Http\Controllers\V1\PaymobWebhookController;
@@ -131,6 +132,7 @@ Route::prefix('v1')->group(function () {
         Route::patch('/profile', PatientProfileController::class)->name('profile.update');
         Route::get('/medications', [MedicationController::class, 'index'])->name('medications.index');
         Route::get('/timeline', TimelineController::class)->name('timeline.index');
+        Route::get('/mobile-notifications', MobileNotificationController::class)->name('mobile.notifications');
     });
 });
 
