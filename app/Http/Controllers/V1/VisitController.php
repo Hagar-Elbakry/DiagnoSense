@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AttendVisitRequest;
 use App\Http\Requests\GetNextVisitDetailsRequest;
 use App\Http\Requests\GetVisitRequest;
 use App\Http\Requests\StoreNextVisitRequest;
@@ -111,6 +112,19 @@ class VisitController extends Controller
             Log::error('Update Visit Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while updating visit.', status: 500);
+        }
+    }
+
+    public function attend(AttendVisitRequest $request, Visit $visit): JsonResponse
+    {
+        try {
+            $this->visitService->attend($visit);
+
+            return ApiResponse::success(message: 'Visit attended successfully.');
+        } catch (Exception $e) {
+            Log::error('Attend Visit Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while attending visit.', status: 500);
         }
     }
 }

@@ -65,4 +65,9 @@ class VisitService
             body: __('Your next visit is scheduled on: :date', ['date' => $visit->next_visit_date?->format('Y-m-d h:i A')])
         );
     }
+
+    public function attend(Visit $visit): void
+    {
+        $visit->update(['status' => 'attended']);
+    }
 }
