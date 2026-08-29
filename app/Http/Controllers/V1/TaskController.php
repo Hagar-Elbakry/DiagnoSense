@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteTaskRequest;
 use App\Http\Requests\GetTaskDetailsRequest;
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\Task\CompleteTaskRequest;
 use App\Http\Resources\DoctorTaskResource;
 use App\Http\Resources\PatientTaskResource;
 use App\Models\Task;
@@ -70,6 +71,24 @@ class TaskController extends Controller
             Log::error('Error fetching task details: '.$e->getMessage(), ['exception' => $e]);
 
             return ApiResponse::error(message: 'Failed to fetch task details, please try again later.', status: 500);
+        }
+    }
+
+    public function toggleTaskCompletion(CompleteTaskRequest $request, Task $task): JsonResponse
+    {
+        try{
+            $task = $this->taskService->toggleTaskCompletion($task);
+
+            return ApiResponse::success(
+                message: $task->is_completed
+                ? 'Task marked as completed'
+                : 'Task marked as uncompleted',
+                data: new PatientTaskResource($task),
+            );
+
+        }catch(Exception $e) {
+            Log::error('Error completing task: '.$e->getMessage(), ['exception' => $e]);
+            return ApiResponse::error(message: 'Failed to complete task, please try again later.', status: 500);
         }
     }
 

@@ -26,4 +26,13 @@ class TaskService
     {
         $task->delete();
     }
+
+    public function toggleTaskCompletion(Task $task)
+    {
+        $task->update([
+            'is_completed' => ! $task->is_completed,
+        ]);
+
+        return $task->load('visit');
+    }
 }

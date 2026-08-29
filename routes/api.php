@@ -121,6 +121,7 @@ Route::prefix('v1')->group(function () {
         Route::controller(TaskController::class)->prefix('tasks')->as('tasks.')->group(function(){
             Route::get('', 'index')->name('index');
             Route::get('/{task}', 'show')->name('show');
+            Route::patch('/{task}/complete', 'toggleTaskCompletion')->name('toggle-completion');
         });
     });
 });
