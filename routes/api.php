@@ -12,6 +12,7 @@ use App\Http\Controllers\V1\KeyPointController;
 use App\Http\Controllers\V1\MedicalFileController;
 use App\Http\Controllers\V1\MedicationController;
 use App\Http\Controllers\V1\PatientController;
+use App\Http\Controllers\V1\PatientProfileController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
 use App\Http\Controllers\V1\SupportController;
@@ -126,6 +127,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('patient/medical-files', MedicalFileController::class)->name('patient.medical-files.index');
+        Route::patch('/profile', PatientProfileController::class)->name('profile.update');
     });
 });
 
