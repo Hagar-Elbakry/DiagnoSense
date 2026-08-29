@@ -4,13 +4,12 @@ use App\Models\Medication;
 use App\Models\Task;
 
 beforeEach(function () {
-    $userDoctor = createUserWithType('doctor', fake()->unique()->safeEmail());
-    $userPatient = createUserWithType('patient', fake()->unique()->safeEmail());
-    $this->doctor = $userDoctor->doctor;
-    $this->patient = $userPatient->patient;
+    $this->userDoctor = createUserWithType('doctor', fake()->unique()->safeEmail());
+    $this->userPatient = createUserWithType('patient', fake()->unique()->safeEmail());
+    $this->doctor = $this->userDoctor->doctor;
+    $this->patient = $this->userPatient->patient;
     $this->doctor->patients()->attach($this->patient);
-    $this->actingAs($userDoctor, 'sanctum');
-    $this->visit = createVisit($this->doctor, $this->patient, today());
+    $this->visit = createVisit($this->doctor, $this->patient);
     $this->task = Task::create([
         'title' => 'Task 1',
         'description' => 'Task description',
@@ -25,7 +24,7 @@ beforeEach(function () {
 });
 
 it('allows doctor to view visit details', function () {
-    $response = $this->get(route('patients.visits.index', ['patient' => $this->patient->id]));
+    $response = $this->actingAs($this->userDoctor, 'sanctum')->getJson(route('patients.visits.index', ['patient' => $this->patient->id]));
     $response->assertStatus(200);
     $response->assertJsonStructure([
         'success',
@@ -63,7 +62,7 @@ it('allows doctor to view visit details', function () {
 
 it('allow doctor to create visit successfully', function () {
     $date = now()->addDays(7)->toDateTimeString();
-    $response = $this->post(route('patients.visits.store', ['patient' => $this->patient->id]), [
+    $response = $this->actingAs($this->userDoctor, 'sanctum')->postJson(route('patients.visits.store', ['patient' => $this->patient->id]), [
         'has_next_visit' => true,
         'next_visit_date' => $date,
         'action' => 'save',
@@ -100,9 +99,27 @@ it('prevents doctor from creating visit for unassigned patient', function () {
     $response->assertStatus(403);
 });
 
+it('returns next visit date', function () {
+    $response = $this->actingAs($this->userPatient, 'sanctum')->getJson(route('next-visit'));
+    $response->assertStatus(200);
+    $response->assertJsonStructure([
+        'success',
+        'message',
+        'data' => [
+            'id',
+            'next_visit_date',
+            'status',
+            'doctor_name',
+            'specialization',
+            'date',
+            'time',
+        ],
+    ]);
+});
+
 it('allows doctor to update visit successfully', function () {
     $date = now()->addDays(7)->toDateTimeString();
-    $response = $this->patch(route('visits.update', ['visit' => $this->visit->id]), [
+    $response = $this->actingAs($this->userDoctor, 'sanctum')->patchJson(route('visits.update', ['visit' => $this->visit->id]), [
         'next_visit_date' => $date
     ]);
     $response->assertStatus(200);
@@ -111,3 +128,13 @@ it('allows doctor to update visit successfully', function () {
         'next_visit_date' => $date,
     ]);
 });
+
+it('allows doctor to mark visit as attended', function () {
+    $response = $this->actingAs($this->userDoctor, 'sanctum')->patchJson(route('visits.attend', $this->visit->id));
+    $response->assertStatus(200);
+    $this->assertDatabaseHas('visits', [
+        'id' => $this->visit->id,
+        'status' => 'attended',
+    ]);
+});
+
