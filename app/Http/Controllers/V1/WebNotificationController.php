@@ -76,4 +76,17 @@ class WebNotificationController extends Controller
             return ApiResponse::error(message: 'Could not mark all notifications as read.', status: 500);
         }
     }
+
+    public function clearAll(Request $request): JsonResponse
+    {
+        try {
+            $this->webNotificationService->clearAll($request->user()->doctor);
+
+            return ApiResponse::success(message: 'All notifications deleted successfully');
+        } catch (Exception $e) {
+            Log::error('Failed to clear all notifications: '.$e->getMessage(), ['exception' => $e]);
+
+            return ApiResponse::error(message: 'Could not clear notifications at the moment.', status: 500);
+        }
+    }
 }
