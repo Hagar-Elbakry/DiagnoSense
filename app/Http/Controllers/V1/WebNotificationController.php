@@ -4,11 +4,13 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MarkNotificationAsReadRequest;
 use App\Http\Resources\WebNotificationResource;
 use App\Services\WebNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Notifications\DatabaseNotification;
 use Exception;
 
 class WebNotificationController extends Controller
@@ -46,6 +48,19 @@ class WebNotificationController extends Controller
             Log::error('Failed to count notifications: '.$e->getMessage());
 
             return ApiResponse::error(message: 'Could not retrieve unread count.', status: 500);
+        }
+    }
+
+    public function read(MarkNotificationAsReadRequest $request, Databasenotification $notification): JsonResponse
+    {
+        try {
+            $this->webNotificationService->read($notification);
+
+            return ApiResponse::success(message: 'Notification marked as read');
+        } catch (Exception $e) {
+            Log::error('Failed to mark notification as read: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Could not mark notification as read.', status: 500);
         }
     }
 }
