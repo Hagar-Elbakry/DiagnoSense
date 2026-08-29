@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Notifications\DatabaseNotification;
-
-
 beforeEach(function () {
     $this->user = createUserWithType('doctor', 'menna@gmail.com');
     $this->doctor = $this->user->doctor;

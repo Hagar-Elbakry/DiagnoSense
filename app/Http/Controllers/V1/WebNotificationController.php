@@ -7,11 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MarkNotificationAsReadRequest;
 use App\Http\Resources\WebNotificationResource;
 use App\Services\WebNotificationService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\DatabaseNotification;
-use Exception;
+use Illuminate\Support\Facades\Log;
 
 class WebNotificationController extends Controller
 {
@@ -51,7 +51,7 @@ class WebNotificationController extends Controller
         }
     }
 
-    public function read(MarkNotificationAsReadRequest $request, Databasenotification $notification): JsonResponse
+    public function read(MarkNotificationAsReadRequest $request, DatabaseNotification $notification): JsonResponse
     {
         try {
             $this->webNotificationService->read($notification);
