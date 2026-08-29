@@ -17,6 +17,7 @@ use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
 use App\Http\Controllers\V1\SupportController;
 use App\Http\Controllers\V1\TaskController;
+use App\Http\Controllers\V1\TimelineController;
 use App\Http\Controllers\V1\VisitController;
 use App\Http\Controllers\V1\WalletController;
 use App\Http\Controllers\V1\WebNotificationController;
@@ -129,6 +130,7 @@ Route::prefix('v1')->group(function () {
         Route::get('patient/medical-files', MedicalFileController::class)->name('patient.medical-files.index');
         Route::patch('/profile', PatientProfileController::class)->name('profile.update');
         Route::get('/medications', [MedicationController::class, 'index'])->name('medications.index');
+        Route::get('/timeline', TimelineController::class)->name('timeline.index');
     });
 });
 
