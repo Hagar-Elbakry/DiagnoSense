@@ -32,4 +32,20 @@ class WebNotificationController extends Controller
             return ApiResponse::error(message: 'Could not load notifications at the moment.', status: 500);
         }
     }
+
+    public function unreadCount(Request $request): JsonResponse
+    {
+        try {
+            $count = $this->webNotificationService->getUnreadCount($request->user()->doctor);
+
+            return ApiResponse::success(
+                message: 'Unread notifications count retrieved successfully.',
+                data: ['unread_count' => $count]
+            );
+        } catch (Exception $e) {
+            Log::error('Failed to count notifications: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'Could not retrieve unread count.', status: 500);
+        }
+    }
 }

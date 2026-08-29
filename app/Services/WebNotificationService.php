@@ -11,4 +11,9 @@ class WebNotificationService
     {
         return $doctor->notifications()->cursorPaginate($perPage);
     }
+
+    public function getUnreadCount(Doctor $doctor): int
+    {
+        return $doctor->unreadNotifications()->count();
+    }
 }
