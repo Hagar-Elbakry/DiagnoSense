@@ -110,4 +110,16 @@ class Patient extends Model
             'id'
         );
     }
+
+    public function tasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Task::class,
+            Visit::class,
+            'patient_id',
+            'visit_id',
+            'id',
+            'id'
+        );
+    }
 }
