@@ -128,6 +128,10 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{task}/complete', 'toggleTaskCompletion')->name('toggle-completion');
         });
 
+        Route::controller(VisitController::class)->group(function() {
+            Route::get('/next-visit', 'show')->name('next-visit');
+        });
+
         Route::get('patient/medical-files', MedicalFileController::class)->name('patient.medical-files.index');
         Route::patch('/profile', PatientProfileController::class)->name('profile.update');
         Route::get('/medications', [MedicationController::class, 'index'])->name('medications.index');

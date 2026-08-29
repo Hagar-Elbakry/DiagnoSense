@@ -41,6 +41,18 @@ class VisitService
         return $visit->load('doctor.user');
     }
 
+    public function getNextVisit(Patient $patient): ?Visit
+    {
+        $nextVisit = $patient->visits()
+            ->where('next_visit_date', '>=', now())
+            ->where('status', '!=', 'attended')
+            ->with('doctor.user')
+            ->orderBy('next_visit_date')
+            ->first();
+
+        return $nextVisit;
+    }
+
     public function updateNextVisit(Visit $visit, array $data): void
     {
         $visit->update([

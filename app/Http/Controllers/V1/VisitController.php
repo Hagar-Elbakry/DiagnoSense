@@ -16,6 +16,7 @@ use App\Models\Visit;
 use App\Services\VisitService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class VisitController extends Controller
@@ -64,6 +65,26 @@ class VisitController extends Controller
             Log::error('Store Visit Error: '.$e->getMessage());
 
             return ApiResponse::error(message: 'An error occurred while creating visit.', status: 500);
+        }
+    }
+
+    public function show(Request $request): JsonResponse
+    {
+        try {
+            $patient = $request->user()->patient;
+            $nextVisit = $this->visitService->getNextVisit($patient);
+            if (! $nextVisit) {
+                return ApiResponse::success(message: 'No upcoming visit.', status: 200);
+            }
+
+            return ApiResponse::success(
+                message: 'Next visit retrieved successfully.',
+                data: new NextVisitResource($nextVisit)
+            );
+        } catch (Exception $e) {
+            Log::error('Show nest visit Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while fetching next visit.', status: 500);
         }
     }
 
