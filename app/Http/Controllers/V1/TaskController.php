@@ -4,19 +4,19 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompleteTaskRequest;
 use App\Http\Requests\DeleteTaskRequest;
 use App\Http\Requests\GetTaskDetailsRequest;
 use App\Http\Requests\StoreTaskRequest;
-use App\Http\Requests\CompleteTaskRequest;
 use App\Http\Resources\DoctorTaskResource;
 use App\Http\Resources\PatientTaskResource;
 use App\Models\Task;
 use App\Models\Visit;
 use App\Services\TaskService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class TaskController extends Controller
 {
@@ -76,7 +76,7 @@ class TaskController extends Controller
 
     public function toggleTaskCompletion(CompleteTaskRequest $request, Task $task): JsonResponse
     {
-        try{
+        try {
             $task = $this->taskService->toggleTaskCompletion($task);
 
             return ApiResponse::success(
@@ -86,8 +86,9 @@ class TaskController extends Controller
                 data: new PatientTaskResource($task),
             );
 
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error completing task: '.$e->getMessage(), ['exception' => $e]);
+
             return ApiResponse::error(message: 'Failed to complete task, please try again later.', status: 500);
         }
     }

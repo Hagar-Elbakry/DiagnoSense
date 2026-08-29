@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Visit;
 use App\Models\Task;
+use App\Models\Visit;
 
 beforeEach(function () {
     $this->user = createUserWithType('doctor', fake()->unique()->safeEmail());
@@ -40,7 +40,7 @@ it('allows patient to view their tasks', function () {
                 'description',
                 'notes',
                 'is_completed',
-                'action' ,
+                'action',
                 'due_date',
                 'doctor_name',
                 'created_at',
@@ -98,7 +98,6 @@ it('denies task creation if next visit date is missing', function () {
         'message' => 'Next visit date is required for tasks.',
     ]);
 });
-
 
 it('allows patient to view task details', function () {
     $response = $this->actingAs($this->patient, 'sanctum')->getJson(route('tasks.show', ['task' => $this->task1->id]));

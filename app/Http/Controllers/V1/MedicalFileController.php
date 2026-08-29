@@ -7,9 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GetPatientMedicalFilesRequest;
 use App\Http\Resources\MedicalFileResource;
 use App\Services\MedicalFileService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class MedicalFileController extends Controller
 {

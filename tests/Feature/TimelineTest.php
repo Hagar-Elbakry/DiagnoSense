@@ -29,7 +29,7 @@ beforeEach(function () {
 
 it('returns a successfully combined and sorted timeline of visits and tasks', function () {
     $response = $this->getJson(route('timeline.index'));
-    
+
     $response->assertStatus(200)
         ->assertJsonPath('success', true)
         ->assertJsonPath('message', 'Timeline retrieved successfully')

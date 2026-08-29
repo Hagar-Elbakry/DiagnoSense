@@ -24,13 +24,12 @@ beforeEach(function () {
 
 it('executes the full notification lifecycle smoothly from token registration to delivery and fetching', function () {
     $patchResponse = $this->actingAs($this->patientUser, 'sanctum')->patchJson(route('patients.fcm-token'), [
-        'fcm_token' => 'mock_fcm_token_123456_xyz'
+        'fcm_token' => 'mock_fcm_token_123456_xyz',
     ]);
     $patchResponse->assertStatus(200);
 
     $this->patientUser->refresh();
     expect($this->patientUser->fcm_token)->toBe('mock_fcm_token_123456_xyz');
-
 
     $taskPayload = [
         'title' => 'Drink water',
@@ -48,6 +47,7 @@ it('executes the full notification lifecycle smoothly from token registration to
         PatientNotification::class,
         function ($notification) {
             $data = $notification->toArray($this->patientUser);
+
             return $data['type'] === 'task';
         }
     );

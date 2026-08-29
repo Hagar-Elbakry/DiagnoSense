@@ -30,7 +30,8 @@ class MobileNotificationController extends Controller
             );
 
         } catch (Exception $e) {
-            Log::error('Error fetching patient notifications via Service: ' . $e->getMessage());
+            Log::error('Error fetching patient notifications via Service: '.$e->getMessage());
+
             return ApiResponse::error(message: __('Failed to fetch notifications'), status: 500);
         }
     }

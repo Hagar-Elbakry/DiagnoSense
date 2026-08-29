@@ -19,5 +19,4 @@ class MobileNotificationResource extends JsonResource
             'time_ago' => $createdAt->diffForHumans(),
         ];
     }
-
 }
