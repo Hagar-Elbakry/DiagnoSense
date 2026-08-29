@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Doctor;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+
+class WebNotificationService
+{
+    public function getPaginatedUserNotifications(Doctor $doctor, int $perPage = 10): CursorPaginator
+    {
+        return $doctor->notifications()->cursorPaginate($perPage);
+    }
+}
