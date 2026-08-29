@@ -9,12 +9,16 @@ use App\Http\Controllers\V1\ChatbotController;
 use App\Http\Controllers\V1\DashboardController;
 use App\Http\Controllers\V1\DoctorProfileController;
 use App\Http\Controllers\V1\KeyPointController;
+use App\Http\Controllers\V1\MedicalFileController;
 use App\Http\Controllers\V1\MedicationController;
+use App\Http\Controllers\V1\MobileNotificationController;
 use App\Http\Controllers\V1\PatientController;
+use App\Http\Controllers\V1\PatientProfileController;
 use App\Http\Controllers\V1\PaymobWebhookController;
 use App\Http\Controllers\V1\SubscriptionController;
 use App\Http\Controllers\V1\SupportController;
 use App\Http\Controllers\V1\TaskController;
+use App\Http\Controllers\V1\TimelineController;
 use App\Http\Controllers\V1\VisitController;
 use App\Http\Controllers\V1\WalletController;
 use App\Http\Controllers\V1\WebNotificationController;
@@ -117,6 +121,18 @@ Route::prefix('v1')->group(function () {
             Route::patch('/read-all', 'readAll')->name('readAll');
             Route::delete('/clear-all', 'clearAll')->name('clearAll');
         });
+
+        Route::controller(TaskController::class)->prefix('tasks')->as('tasks.')->group(function () {
+            Route::get('', 'index')->name('index');
+            Route::get('/{task}', 'show')->name('show');
+            Route::patch('/{task}/complete', 'toggleTaskCompletion')->name('toggle-completion');
+        });
+
+        Route::get('patient/medical-files', MedicalFileController::class)->name('patient.medical-files.index');
+        Route::patch('/profile', PatientProfileController::class)->name('profile.update');
+        Route::get('/medications', [MedicationController::class, 'index'])->name('medications.index');
+        Route::get('/timeline', TimelineController::class)->name('timeline.index');
+        Route::get('/mobile-notifications', MobileNotificationController::class)->name('mobile.notifications');
     });
 });
 

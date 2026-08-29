@@ -4,14 +4,18 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompleteTaskRequest;
 use App\Http\Requests\DeleteTaskRequest;
+use App\Http\Requests\GetTaskDetailsRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Resources\DoctorTaskResource;
+use App\Http\Resources\PatientTaskResource;
 use App\Models\Task;
 use App\Models\Visit;
 use App\Services\TaskService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
@@ -19,6 +23,23 @@ class TaskController extends Controller
     public function __construct(
         protected TaskService $taskService
     ) {}
+
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $patient = $request->user()->patient;
+            $tasks = $this->taskService->getTasks($patient);
+
+            return ApiResponse::success(
+                message: 'Tasks retrieved successfully',
+                data: PatientTaskResource::collection($tasks),
+            );
+        } catch (Exception $e) {
+            Log::error('Error fetching tasks: '.$e->getMessage(), ['exception' => $e]);
+
+            return ApiResponse::error(message: 'Failed to retrieve tasks, please try again later.', status: 500);
+        }
+    }
 
     public function store(StoreTaskRequest $request, Visit $visit): JsonResponse
     {
@@ -34,6 +55,41 @@ class TaskController extends Controller
             Log::error('Error creating task: '.$e->getMessage(), ['exception' => $e]);
 
             return ApiResponse::error(message: 'Failed to create task, please try again later.', status: 500);
+        }
+    }
+
+    public function show(GetTaskDetailsRequest $request, Task $task): JsonResponse
+    {
+        try {
+            $task->load('visit');
+
+            return ApiResponse::success(
+                message: 'Task details retrieved successfully',
+                data: new PatientTaskResource($task),
+            );
+        } catch (Exception $e) {
+            Log::error('Error fetching task details: '.$e->getMessage(), ['exception' => $e]);
+
+            return ApiResponse::error(message: 'Failed to fetch task details, please try again later.', status: 500);
+        }
+    }
+
+    public function toggleTaskCompletion(CompleteTaskRequest $request, Task $task): JsonResponse
+    {
+        try {
+            $task = $this->taskService->toggleTaskCompletion($task);
+
+            return ApiResponse::success(
+                message: $task->is_completed
+                ? 'Task marked as completed'
+                : 'Task marked as uncompleted',
+                data: new PatientTaskResource($task),
+            );
+
+        } catch (Exception $e) {
+            Log::error('Error completing task: '.$e->getMessage(), ['exception' => $e]);
+
+            return ApiResponse::error(message: 'Failed to complete task, please try again later.', status: 500);
         }
     }
 

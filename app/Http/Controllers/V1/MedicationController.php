@@ -7,11 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteMedicationRequest;
 use App\Http\Requests\StoreMedicationRequest;
 use App\Http\Resources\DoctorMedicationResource;
+use App\Http\Resources\MedicationListResource;
 use App\Models\Medication;
 use App\Models\Visit;
 use App\Services\MedicationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class MedicationController extends Controller
@@ -19,6 +21,26 @@ class MedicationController extends Controller
     public function __construct(
         protected MedicationService $medicationService
     ) {}
+
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $patient = $request->user()->patient;
+            if (! $patient) {
+                return ApiResponse::error(message: 'No patient profile found for the user.', status: 404);
+            }
+            $medications = $this->medicationService->getPatientMedications($patient);
+
+            return ApiResponse::success(
+                message: 'Patient medications retrieved successfully',
+                data: MedicationListResource::collection($medications)
+            );
+        } catch (Exception $e) {
+            Log::error('Get Medications Error: '.$e->getMessage());
+
+            return ApiResponse::error(message: 'An error occurred while retrieving medications.', status: 500);
+        }
+    }
 
     public function store(StoreMedicationRequest $request, Visit $visit): JsonResponse
     {
