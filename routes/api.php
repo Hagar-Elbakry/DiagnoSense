@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\ChatbotController;
 use App\Http\Controllers\V1\DashboardController;
 use App\Http\Controllers\V1\DoctorProfileController;
 use App\Http\Controllers\V1\KeyPointController;
+use App\Http\Controllers\V1\MedicalFileController;
 use App\Http\Controllers\V1\MedicationController;
 use App\Http\Controllers\V1\PatientController;
 use App\Http\Controllers\V1\PaymobWebhookController;
@@ -123,6 +124,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/{task}', 'show')->name('show');
             Route::patch('/{task}/complete', 'toggleTaskCompletion')->name('toggle-completion');
         });
+
+        Route::get('patient/medical-files', MedicalFileController::class)->name('patient.medical-files.index');
     });
 });
 
