@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Helpers\Auth;
+use App\Helpers\Authentication;
 use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Models\UserSocialAccount;
@@ -66,7 +66,7 @@ class SocialAuthService
 
             return [
                 'user' => $user,
-                'token' => Auth::getToken($user),
+                'token' => Authentication::getToken($user),
             ];
         });
     }

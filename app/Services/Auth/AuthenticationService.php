@@ -3,7 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Events\User\UserRegistered;
-use App\Helpers\Auth;
+use App\Helpers\Authentication;
 use App\Mail\EmailVerificationMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\User;
@@ -29,9 +29,9 @@ class AuthenticationService
             $user = User::create($data);
             $user->doctor()->create();
 
-            $token = Auth::getToken($user);
+            $token = Authentication::getToken($user);
             $userId = $user->doctor->id;
-            $otpCode = Auth::generateOtp($user->contact, $this->otp);
+            $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
             UserRegistered::dispatch($user, $otpCode);
 
@@ -46,7 +46,7 @@ class AuthenticationService
             return null;
         }
 
-        $token = Auth::getToken($user);
+        $token = Authentication::getToken($user);
         $userId = $type == 'doctor' ? $user->doctor->id : $user->patient->id;
 
         return compact('user', 'token', 'userId');
@@ -61,7 +61,7 @@ class AuthenticationService
     {
         $user = $this->getUser($data['contact']);
 
-        $otpCode = Auth::generateOtp($user->contact, $this->otp);
+        $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
         $this->sendOtp($user, $otpCode, isPasswordReset: true);
     }
@@ -111,7 +111,7 @@ class AuthenticationService
             return false;
         }
 
-        $otpCode = Auth::generateOtp($user->contact, $this->otp);
+        $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
         $this->sendOtp($user, $otpCode);
 
