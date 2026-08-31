@@ -27,7 +27,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
-        Route::post('register', [AuthenticationController::class, 'register'])->name('auth.register');
+        Route::post('register', [AuthenticationController::class, 'register'])
+            ->middleware('throttle:registration')
+            ->name('auth.register');
         Route::controller(SocialAuthController::class)->prefix('google')->as('google.')->group(function () {
             Route::get('/redirect', 'redirectToGoogle')->name('redirect');
             Route::get('/callback', 'handleGoogleCallback')->name('callback');
