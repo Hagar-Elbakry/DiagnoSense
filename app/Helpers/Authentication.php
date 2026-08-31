@@ -5,11 +5,11 @@ namespace App\Helpers;
 use App\Models\User;
 use Ichtrojan\Otp\Otp;
 
-class Auth
+class Authentication
 {
     public static function getToken(User $user): string
     {
-        return $user->createToken('auth_token.'.$user->name)->plainTextToken;
+        return $user->createToken('auth_token')->plainTextToken;
     }
 
     public static function generateOtp(string $contact, Otp $otp): string

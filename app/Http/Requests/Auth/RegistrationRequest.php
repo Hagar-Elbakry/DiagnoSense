@@ -24,8 +24,9 @@ class RegistrationRequest extends FormRequest
             ],
             'contact' => [
                 'required',
-                new ValidContactRule,
+                'string',
                 'bail',
+                new ValidContactRule,
                 Rule::unique('users', 'contact'),
             ],
             'password' => [
@@ -41,6 +42,7 @@ class RegistrationRequest extends FormRequest
     {
         return [
             'contact.required' => 'The contact field is required.',
+            'contact.string' => 'The contact must be a string.',
             'contact.unique' => 'The contact has already been taken.',
         ];
     }

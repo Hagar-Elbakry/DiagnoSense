@@ -8,7 +8,7 @@ use App\Notifications\EmailVerificationSMSNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 
-class SendVerificationEmail implements ShouldQueue
+class SendVerificationOtp implements ShouldQueue
 {
     public function handle(UserRegistered $event): void
     {

@@ -17,18 +17,19 @@ use Symfony\Component\Mailer\Transport\Dsn;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
-
-    /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
+        RateLimiter::for('registration', function (Request $request) {
+            $key = $request->ip().'|'.($request->input('contact') ?? '');
+
+            return [
+                Limit::perMinute(10)->by($request->ip()),
+                Limit::perMinute(5)->by($key),
+            ];
+        });
+
         RateLimiter::for('login', function ($request) {
             return Limit::perMinute(5)->by($request->contact.$request->ip())
                 ->response(function (Request $request, array $headers) {

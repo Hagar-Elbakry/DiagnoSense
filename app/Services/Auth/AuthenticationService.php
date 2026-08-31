@@ -2,8 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Events\User\UserRegistered;
-use App\Helpers\Auth;
+use App\Helpers\Authentication;
 use App\Mail\EmailVerificationMail;
 use App\Mail\ResetPasswordMail;
 use App\Models\User;
@@ -20,22 +19,6 @@ class AuthenticationService
         protected Otp $otp
     ) {}
 
-    public function register(array $data): array
-    {
-        return DB::transaction(function () use ($data) {
-            $user = User::create($data);
-            $user->doctor()->create();
-
-            $token = Auth::getToken($user);
-            $userId = $user->doctor->id;
-            $otpCode = Auth::generateOtp($user->contact, $this->otp);
-
-            UserRegistered::dispatch($user, $otpCode);
-
-            return compact('user', 'token', 'userId');
-        });
-    }
-
     public function login(array $data, string $type): ?array
     {
         $user = $this->authenticate($data['contact'], $data['password']);
@@ -43,7 +26,7 @@ class AuthenticationService
             return null;
         }
 
-        $token = Auth::getToken($user);
+        $token = Authentication::getToken($user);
         $userId = $type == 'doctor' ? $user->doctor->id : $user->patient->id;
 
         return compact('user', 'token', 'userId');
@@ -58,7 +41,7 @@ class AuthenticationService
     {
         $user = $this->getUser($data['contact']);
 
-        $otpCode = Auth::generateOtp($user->contact, $this->otp);
+        $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
         $this->sendOtp($user, $otpCode, isPasswordReset: true);
     }
@@ -108,7 +91,7 @@ class AuthenticationService
             return false;
         }
 
-        $otpCode = Auth::generateOtp($user->contact, $this->otp);
+        $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
         $this->sendOtp($user, $otpCode);
 
