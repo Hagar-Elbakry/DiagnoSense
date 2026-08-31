@@ -124,6 +124,6 @@ it('blocks excessive registration attempts via rate limiter', function (){
     $response->assertStatus(429);
     $response->assertJson([
         'success' => false,
-        'message' => 'Too many registration attempts. Please try again later.',
+        'message' => 'Too many attempts. Please try again later.',
     ]);
 });

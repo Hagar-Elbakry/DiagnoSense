@@ -60,7 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ThrottleRequestsException|TooManyRequestsHttpException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return ApiResponse::error(
-                    message: 'Too many registration attempts. Please try again later.',
+                    message: 'Too many attempts. Please try again later.',
                     status: 429
                 );
             }
