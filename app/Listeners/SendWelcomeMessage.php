@@ -8,7 +8,7 @@ use App\Notifications\WelcomeSMSNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 
-class SendWelcomeEmail implements ShouldQueue
+class SendWelcomeMessage implements ShouldQueue
 {
     /**
      * Handle the event.
