@@ -24,7 +24,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('registration', function (Request $request) {
             $key = $request->ip().'|'.($request->input('contact') ?? '');
 
-            return Limit::perMinute(5)->by($key);
+            return [
+                Limit::perMinute(10)->by($request->ip()),
+                Limit::perMinute(5)->by($key)
+            ];
         });
 
         RateLimiter::for('login', function ($request) {
