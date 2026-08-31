@@ -9,12 +9,14 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -51,6 +53,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 return ApiResponse::error(
                     message: 'Unauthenticated.',
                     status: 401
+                );
+            }
+        });
+
+        $exceptions->render(function (ThrottleRequestsException|TooManyRequestsHttpException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    message: 'Too many registration attempts. Please try again later.',
+                    status: 429
                 );
             }
         });
