@@ -20,28 +20,6 @@ class AuthenticationService
         protected Otp $otp
     ) {}
 
-    public function register(array $data): array
-    {
-        return DB::transaction(function () use ($data) {
-            $data['type'] = 'doctor';
-            $data['is_active'] = true;
-
-            $user = User::create($data);
-            $doctor = $user->doctor()->create();
-
-            $token = Authentication::getToken($user);
-            $otpCode = Authentication::generateOtp($user->contact, $this->otp);
-
-            UserRegistered::dispatch($user, $otpCode);
-
-            return [
-                'user' => $user,
-                'doctor_id' => $doctor->id,
-                'token' => $token,
-            ];
-        });
-    }
-
     public function login(array $data, string $type): ?array
     {
         $user = $this->authenticate($data['contact'], $data['password']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Auth;
 
+use App\Actions\RegisterDoctorAction;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -19,10 +20,10 @@ class AuthenticationController extends Controller
         protected AuthenticationService $authenticationService
     ) {}
 
-    public function register(RegistrationRequest $request): JsonResponse
+    public function register(RegistrationRequest $request, RegisterDoctorAction $action): JsonResponse
     {
             $data = $request->validated();
-            $result = $this->authenticationService->register($data);
+            $result = $action->execute($data);
 
             return ApiResponse::success(
                 message: 'User registered successfully',
