@@ -21,7 +21,6 @@ class AuthenticationController extends Controller
 
     public function register(RegistrationRequest $request): JsonResponse
     {
-        try {
             $data = $request->validated();
             $result = $this->authenticationService->register($data);
 
@@ -34,11 +33,6 @@ class AuthenticationController extends Controller
                 ],
                 status: 201
             );
-        } catch (Exception $e) {
-            Log::error('Error registering user: '.$e->getMessage(), ['exception' => $e]);
-
-            return ApiResponse::error(message: 'Failed to register user, please try again later.', status: 500);
-        }
     }
 
     public function login(LoginRequest $request, string $type): JsonResponse

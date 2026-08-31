@@ -8,10 +8,13 @@ use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -46,5 +49,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 message: 'The requested resource was not found.',
                 status: 404
             );
+        });
+
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if($request->is('api/*') || $request->expectsJson()) {
+                if($e instanceof ValidationException) {
+                    return null;
+                }
+                $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
+                $message = $statusCode === 500
+                    ? 'Failed to process request, please try again later.'
+                    : $e->getMessage();
+                return ApiResponse::error(
+                    message: $message,
+                    status: $statusCode
+                );
+            }
         });
     })->create();
