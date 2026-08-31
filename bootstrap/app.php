@@ -5,6 +5,7 @@ use App\Http\Middleware\CheckAiAccess;
 use App\Http\Middleware\CheckUserType;
 use App\Http\Middleware\EnsureContactIsVerifiedMiddleware;
 use App\Http\Middleware\ForceJsonResponse;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,7 +15,6 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,31 +36,44 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (ValidationException $e) {
-            return ApiResponse::error(
-                message: 'Validation Errors',
-                data: $e->errors(),
-                status: 422
-            );
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    message: 'Validation Errors',
+                    data: $e->errors(),
+                    status: 422
+                );
+            }
         });
 
-        $exceptions->render(function (NotFoundHttpException $e) {
-            return ApiResponse::error(
-                message: 'The requested resource was not found.',
-                status: 404
-            );
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    message: 'Unauthenticated.',
+                    status: 401
+                );
+            }
+        });
+
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    message: 'The requested resource was not found.',
+                    status: 404
+                );
+            }
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {
-            if($request->is('api/*') || $request->expectsJson()) {
-                if($e instanceof ValidationException) {
-                    return null;
-                }
-                $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+            if ($request->is('api/*') || $request->expectsJson()) {
+                $statusCode = $e instanceof HttpExceptionInterface
+                    ? $e->getStatusCode()
+                    : 500;
 
                 $message = $statusCode === 500
                     ? 'Failed to process request, please try again later.'
                     : $e->getMessage();
+
                 return ApiResponse::error(
                     message: $message,
                     status: $statusCode
