@@ -38,6 +38,7 @@ it('allow user to register', function (string $contact) {
     ]);
     $this->assertDatabaseHas('users', [
         'contact' => $response->json('data.user.contact'),
+        'type' => 'doctor',
     ]);
     $this->assertDatabaseHas('doctors', [
         'id' => $response->json('data.user.id'),

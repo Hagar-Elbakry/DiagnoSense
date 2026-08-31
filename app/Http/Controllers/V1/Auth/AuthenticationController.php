@@ -23,7 +23,6 @@ class AuthenticationController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['is_active'] = true;
             $result = $this->authenticationService->register($data);
 
             return ApiResponse::success(

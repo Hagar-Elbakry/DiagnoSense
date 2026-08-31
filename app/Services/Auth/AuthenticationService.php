@@ -23,6 +23,9 @@ class AuthenticationService
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
+            $data['type'] = 'doctor';
+            $data['is_active'] = true;
+
             $user = User::create($data);
             $user->doctor()->create();
 
