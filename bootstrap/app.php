@@ -3,6 +3,7 @@
 use App\Helpers\ApiResponse;
 use App\Http\Middleware\CheckAiAccess;
 use App\Http\Middleware\CheckUserType;
+use App\Http\Middleware\EnsureContactIsVerifiedMiddleware;
 use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(ForceJsonResponse::class);
 
         $middleware->alias([
+            'verified.contact' => EnsureContactIsVerifiedMiddleware::class,
             'check-user-type' => CheckUserType::class,
             'check-ai-access' => CheckAiAccess::class,
             'abilities' => CheckAbilities::class,
