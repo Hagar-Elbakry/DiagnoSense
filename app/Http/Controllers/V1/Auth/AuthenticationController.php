@@ -22,18 +22,18 @@ class AuthenticationController extends Controller
 
     public function register(RegistrationRequest $request, RegisterDoctorAction $action): JsonResponse
     {
-            $data = $request->validated();
-            $result = $action->execute($data);
+        $data = $request->validated();
+        $result = $action->execute($data);
 
-            return ApiResponse::success(
-                message: 'User registered successfully',
-                data: [
-                    'user' => new UserResource($result['user']),
-                    'doctor_id' => $result['doctor_id'],
-                    'token' => $result['token'],
-                ],
-                status: 201
-            );
+        return ApiResponse::success(
+            message: 'User registered successfully',
+            data: [
+                'user' => new UserResource($result['user']),
+                'doctor_id' => $result['doctor_id'],
+                'token' => $result['token'],
+            ],
+            status: 201
+        );
     }
 
     public function login(LoginRequest $request, string $type): JsonResponse

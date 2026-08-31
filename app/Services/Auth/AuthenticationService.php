@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth;
 
-use App\Events\User\UserRegistered;
 use App\Helpers\Authentication;
 use App\Mail\EmailVerificationMail;
 use App\Mail\ResetPasswordMail;

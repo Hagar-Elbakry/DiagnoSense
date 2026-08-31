@@ -108,7 +108,7 @@ it('fails registration with invalid data', function (array $invalidField, array 
     'password not match' => [['password_confirmation' => 'wrongpassword'], ['password' => ['The password field confirmation does not match.']]],
 ]);
 
-it('blocks excessive registration attempts via rate limiter', function (){
+it('blocks excessive registration attempts via rate limiter', function () {
     $contact = fake()->unique()->safeEmail();
 
     for ($i = 0; $i < 5; $i++) {

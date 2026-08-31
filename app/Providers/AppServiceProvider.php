@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
 
             return [
                 Limit::perMinute(10)->by($request->ip()),
-                Limit::perMinute(5)->by($key)
+                Limit::perMinute(5)->by($key),
             ];
         });
 

@@ -130,7 +130,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{task}/complete', 'toggleTaskCompletion')->name('toggle-completion');
         });
 
-        Route::controller(VisitController::class)->group(function() {
+        Route::controller(VisitController::class)->group(function () {
             Route::get('/next-visit', 'show')->name('next-visit');
             Route::patch('/visits/{visit}/attend', 'attend')->name('visits.attend');
         });
