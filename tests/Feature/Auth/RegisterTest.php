@@ -30,18 +30,22 @@ it('allow user to register', function (string $contact) {
                 'id',
                 'name',
                 'contact',
+                'type',
                 'created_at',
                 'updated_at',
             ],
+            'doctor_id',
             'token',
         ],
     ]);
     $this->assertDatabaseHas('users', [
+        'id' => $response->json('data.user.id'),
         'contact' => $response->json('data.user.contact'),
         'type' => 'doctor',
     ]);
     $this->assertDatabaseHas('doctors', [
-        'id' => $response->json('data.user.id'),
+        'id' => $response->json('data.doctor_id'),
+        'user_id' => $response->json('data.user.id')
     ]);
 })->with([
     'email' => [fake()->unique()->safeEmail()],

@@ -28,7 +28,8 @@ class AuthenticationController extends Controller
             return ApiResponse::success(
                 message: 'User registered successfully',
                 data: [
-                    'user' => (new UserResource($result['user']))->additional(['user_id' => $result['userId']]),
+                    'user' => new UserResource($result['user']),
+                    'doctor_id' => $result['doctor_id'],
                     'token' => $result['token'],
                 ],
                 status: 201

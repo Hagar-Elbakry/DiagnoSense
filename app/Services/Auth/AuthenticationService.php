@@ -27,15 +27,18 @@ class AuthenticationService
             $data['is_active'] = true;
 
             $user = User::create($data);
-            $user->doctor()->create();
+            $doctor = $user->doctor()->create();
 
             $token = Authentication::getToken($user);
-            $userId = $user->doctor->id;
             $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
             UserRegistered::dispatch($user, $otpCode);
 
-            return compact('user', 'token', 'userId');
+            return [
+                'user' => $user,
+                'doctor_id' => $doctor->id,
+                'token' => $token,
+            ];
         });
     }
 
