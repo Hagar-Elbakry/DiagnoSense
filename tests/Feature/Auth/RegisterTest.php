@@ -40,7 +40,8 @@ it('allows a doctor to register successfully with valid email or phone', functio
         ],
     ]);
 
-    $response->assertJsonMissing(['password']);
+    $response->assertJsonMissingPath('data.user.password');
+    $response->assertJsonMissingPath('data.user.password_confirmation');
 
     Event::assertDispatched(UserRegistered::class, function ($event) use ($contact) {
         return $event->user->contact === $contact;
