@@ -104,6 +104,7 @@ it('fails registration with invalid data', function (array $invalidField, array 
     'name missing' => [['name' => null], ['name' => ['The name field is required.']]],
     'contact missing' => [['contact' => null], ['contact' => ['The contact field is required.']]],
     'contact is not valid' => [['contact' => 'not-an-email-or-phone'], ['contact' => ['The contact must be a valid email address or a valid phone number starting with 010, 011, 012, or 015 followed by 8 digits.']]],
+    'password too short' => [['password' => '1234567', 'password_confirmation' => '1234567'], ['password' => ['The password field must be at least 8 characters.']]],
     'password not match' => [['password_confirmation' => 'wrongpassword'], ['password' => ['The password field confirmation does not match.']]],
 ]);
 
@@ -120,6 +121,30 @@ it('blocks excessive registration attempts via rate limiter', function (){
     $response = $this->postJson(
         route('auth.register'),
         array_merge($this->validData, ['contact' => $contact])
+    );
+
+    $response->assertStatus(429);
+    $response->assertJson([
+        'success' => false,
+        'message' => 'Too many attempts. Please try again later.',
+    ]);
+});
+
+it('blocks excessive registration attempts from the same IP even when rotating contacts', function () {
+    for ($i = 0; $i < 10; $i++) {
+        $this->postJson(
+            route('auth.register'),
+            array_merge($this->validData, [
+                'contact' => fake()->unique()->safeEmail(),
+            ])
+        );
+    }
+
+    $response = $this->postJson(
+        route('auth.register'),
+        array_merge($this->validData, [
+            'contact' => fake()->unique()->safeEmail(),
+        ])
     );
 
     $response->assertStatus(429);
