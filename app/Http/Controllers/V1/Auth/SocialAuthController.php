@@ -11,9 +11,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class SocialAuthController extends Controller
 {
@@ -37,9 +35,13 @@ class SocialAuthController extends Controller
     public function handleGoogleCallback(Request $request): RedirectResponse
     {
         try {
-            $result = $this->socialAuthService->handleProviderCallback('google', $request->query('state'));
-            $frontendUrl = config('services.frontend.url');
+            $result = $this->socialAuthService->handleProviderCallback(
+                provider: 'google',
+                state: $request->query('state')
+            );
+
             $code = $this->socialAuthService->createExchangeCode($result['user'], $result['token']);
+            $frontendUrl = config('services.frontend.url');
 
             return redirect()->to("{$frontendUrl}/auth/callback?code={$code}");
 
@@ -67,7 +69,7 @@ class SocialAuthController extends Controller
                 ]
             );
         } catch (Exception $e) {
-            return ApiResponse::error(message: $e->getMessage());
+            return ApiResponse::error(message: $e->getMessage(), status: 400);
         }
     }
 }

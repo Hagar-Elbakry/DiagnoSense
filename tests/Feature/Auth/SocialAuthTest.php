@@ -7,10 +7,16 @@ use App\Models\UserSocialAccount;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\get;
-
+function generateValidEncryptedState(): string
+{
+    return Crypt::encryptString(json_encode([
+        'nonce' => Str::random(32),
+        'expires_at' => now()->addMinutes(10)->timestamp,
+    ]));
+}
 function mockSocialiteUser(
     string $id = '12345',
     string $email = 'doctor@example.com',
@@ -36,7 +42,7 @@ beforeEach(function () {
 });
 
 it('generates redirect url successfully', function () {
-    $response = get(route('google.redirect'));
+    $response = $this->getJson(route('google.redirect'));
 
     $response->assertOk()
         ->assertJsonStructure([
@@ -46,7 +52,8 @@ it('generates redirect url successfully', function () {
         ]);
 });
 
-it('creates a new doctor user and social account on first login', function () {
+it('creates a new doctor user and redirects with an exchange code', function () {
+    $validState = generateValidEncryptedState();
 
     mockSocialiteUser(
         id: 'google-unique-id',
@@ -54,8 +61,9 @@ it('creates a new doctor user and social account on first login', function () {
         name: 'Menna Baligh'
     );
 
-    $response = get(route('google.callback'));
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
 
+    $response->assertRedirect();
     $location = $response->headers->get('Location');
     expect($location)->toContain('https://frontend.test/auth/callback?code=');
 
@@ -67,10 +75,8 @@ it('creates a new doctor user and social account on first login', function () {
         ->type->toBe('doctor')
         ->doctor->not->toBeNull();
 
-    assertDatabaseHas('doctors', [
-        'user_id' => $user->id,
-    ]);
-    assertDatabaseHas('user_social_accounts', [
+    $this->assertDatabaseHas('doctors', ['user_id' => $user->id]);
+    $this->assertDatabaseHas('user_social_accounts', [
         'user_id' => $user->id,
         'provider' => 'google',
         'provider_id' => 'google-unique-id',
@@ -79,11 +85,11 @@ it('creates a new doctor user and social account on first login', function () {
     Event::assertDispatched(UserRegistered::class);
 });
 
-it('logs in doctor directly if social account already exists', function () {
+it('logs in doctor directly if social account already exists without dispatching registration event', function () {
+    $validState = generateValidEncryptedState();
 
     $user = User::factory()->create([
         'contact' => 'existing-social@example.com',
-        'type' => 'doctor'
     ]);
     Doctor::factory()->create(['user_id' => $user->id]);
 
@@ -98,14 +104,19 @@ it('logs in doctor directly if social account already exists', function () {
         email: 'existing-social@example.com'
     );
 
-    $response = get(route('google.callback'));
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
 
+    $response->assertRedirect();
     $location = $response->headers->get('Location');
     expect($location)->toContain('https://frontend.test/auth/callback?code=');
+
     expect(User::count())->toBe(1);
+    Event::assertNotDispatched(UserRegistered::class);
 });
 
 it('denies login if the account is not a doctor', function () {
+    $validState = generateValidEncryptedState();
+
     User::factory()->create([
         'contact' => 'patient@example.com',
         'type' => 'patient',
@@ -116,14 +127,24 @@ it('denies login if the account is not a doctor', function () {
         email: 'patient@example.com'
     );
 
-    $response = get(route('google.callback'));
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
 
     $location = $response->headers->get('Location');
     expect($location)->toContain('message=auth_failed');
 });
 
-it('successfully exchanges code for user data and auth token', function () {
-    $user = User::factory()->create(['type' => 'doctor']);
+it('fails and redirects to auth_failed if state is missing or invalid', function () {
+    $response = $this->getJson(route('google.callback'));
+    expect($response->headers->get('Location'))->toContain('message=auth_failed');
+
+    $invalidResponse = $this->getJson(route('google.callback', ['state' => 'forged-state-string']));
+    expect($invalidResponse->headers->get('Location'))->toContain('message=auth_failed');
+});
+
+it('successfully exchanges code for doctor', function () {
+    $user = User::factory()->create([
+        'is_active' => true,
+    ]);
     Doctor::factory()->create(['user_id' => $user->id]);
 
     $token = 'dummy-sanctum-token-123';
@@ -154,9 +175,9 @@ it('successfully exchanges code for user data and auth token', function () {
         ]);
 });
 
-it('fails to exchange an expired, invalid, or already-used code', function () {
+it('fails to exchange an expired or invalid code', function () {
     $response = $this->postJson(route('google.exchange'), [
-        'code' => 'non-existent-or-expired-code',
+        'code' => 'non-existent-code',
     ]);
 
     $response->assertStatus(400)
