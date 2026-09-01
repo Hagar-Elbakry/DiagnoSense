@@ -4,11 +4,11 @@ use App\Events\User\UserRegistered;
 use App\Models\Doctor;
 use App\Models\User;
 use App\Models\UserSocialAccount;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Str;
 
 function generateValidEncryptedState(string $clientNonce, ?int $expiresAt = null): string
 {
@@ -102,7 +102,7 @@ it('logs in doctor directly if social account already exists without dispatching
     $validState = generateValidEncryptedState($clientNonce);
 
     $user = User::factory()->create([
-        'contact' => 'existing-social@example.com'
+        'contact' => 'existing-social@example.com',
     ]);
     Doctor::factory()->create(['user_id' => $user->id]);
 
@@ -181,13 +181,13 @@ it('successfully exchanges code with matching client_nonce for  doctor', functio
                 'user' => [
                     'id',
                     'name',
-                    'contact' ,
-                    'type' ,
+                    'contact',
+                    'type',
                     'created_at',
                     'updated_at',
                 ],
-                'doctor_id' ,
-                'token'
+                'doctor_id',
+                'token',
             ],
         ]);
 });

@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\ContactVerificationRequested;
-use App\Events\User\UserRegistered;
 use App\Mail\EmailVerificationMail;
 use App\Notifications\EmailVerificationSMSNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;

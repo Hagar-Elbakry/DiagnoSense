@@ -26,7 +26,7 @@ class SocialAuthService
         }
     }
 
-    public function getRedirectUrl(string $provider, string $clientNonce = null): string
+    public function getRedirectUrl(string $provider, ?string $clientNonce = null): string
     {
         $this->validateProvider($provider);
 
@@ -147,7 +147,7 @@ class SocialAuthService
         });
     }
 
-    public function createExchangeCode(User $user, string $token, string $clientNonce = null): string
+    public function createExchangeCode(User $user, string $token, ?string $clientNonce = null): string
     {
         $code = Str::random(40);
 
@@ -160,7 +160,7 @@ class SocialAuthService
         return $code;
     }
 
-    public function exchangeCode(string $code, string $providedNonce = null): array
+    public function exchangeCode(string $code, ?string $providedNonce = null): array
     {
         $lock = Cache::lock("lock_exchange_{$code}", 5);
 
