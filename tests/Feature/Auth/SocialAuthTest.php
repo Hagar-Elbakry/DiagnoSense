@@ -10,12 +10,12 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
-function generateValidEncryptedState(?string $clientNonce = null): string
+function generateValidEncryptedState(string $clientNonce, ?int $expiresAt = null): string
 {
     return Crypt::encryptString(json_encode([
         'server_nonce' => Str::random(32),
         'client_nonce' => $clientNonce,
-        'expires_at' => now()->addMinutes(10)->timestamp,
+        'expires_at' => $expiresAt ?? now()->addMinutes(10)->timestamp,
     ]));
 }
 function mockSocialiteUser(
@@ -44,8 +44,16 @@ beforeEach(function () {
     config(['services.frontend.url' => 'https://frontend.test']);
 });
 
-it('generates redirect url successfully', function () {
-    $response = $this->getJson(route('google.redirect', ['client_nonce' => 'test-nonce-123']));
+it('fails redirect generation when client_nonce is missing or invalid', function () {
+    $this->getJson(route('google.redirect'))
+        ->assertStatus(422);
+
+    $this->getJson(route('google.redirect', ['client_nonce' => 'short']))
+        ->assertStatus(422);
+});
+
+it('generates redirect url successfully with a valid client_nonce', function () {
+    $response = $this->getJson(route('google.redirect', ['client_nonce' => Str::random(32)]));
 
     $response->assertOk()
         ->assertJsonStructure([
@@ -56,7 +64,8 @@ it('generates redirect url successfully', function () {
 });
 
 it('creates a new doctor user and redirects with an exchange code', function () {
-    $validState = generateValidEncryptedState('client-test-nonce');
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
 
     mockSocialiteUser(
         id: 'google-unique-id',
@@ -89,7 +98,8 @@ it('creates a new doctor user and redirects with an exchange code', function () 
 });
 
 it('logs in doctor directly if social account already exists without dispatching registration event', function () {
-    $validState = generateValidEncryptedState();
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
 
     $user = User::factory()->create([
         'contact' => 'existing-social@example.com'
@@ -118,7 +128,8 @@ it('logs in doctor directly if social account already exists without dispatching
 });
 
 it('denies login if the account is not a doctor', function () {
-    $validState = generateValidEncryptedState();
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
 
     User::factory()->create([
         'contact' => 'patient@example.com',
@@ -144,7 +155,7 @@ it('fails and redirects to auth_failed if state is missing or invalid', function
     expect($invalidResponse->headers->get('Location'))->toContain('message=auth_failed');
 });
 
-it('successfully exchanges code for doctor', function () {
+it('successfully exchanges code with matching client_nonce for  doctor', function () {
     $user = User::factory()->create([
         'is_active' => true,
     ]);
@@ -152,14 +163,17 @@ it('successfully exchanges code for doctor', function () {
 
     $token = 'dummy-sanctum-token-123';
     $code = 'valid-test-exchange-code-456';
+    $clientNonce = Str::random(32);
 
     Cache::put("social_exchange_{$code}", [
         'user_id' => $user->id,
         'token' => $token,
+        'client_nonce' => $clientNonce,
     ], now()->addSeconds(60));
 
     $response = $this->postJson(route('google.exchange'), [
         'code' => $code,
+        'client_nonce' => $clientNonce,
     ]);
     $response->assertOk()
         ->assertJsonStructure([
@@ -178,14 +192,29 @@ it('successfully exchanges code for doctor', function () {
         ]);
 });
 
-it('fails to exchange an expired or invalid code', function () {
+it('denies exchange if client_nonce does not match', function () {
+    $user = User::factory()->create([
+        'is_active' => true,
+    ]);
+    Doctor::factory()->create(['user_id' => $user->id]);
+
+    $code = 'valid-exchange-code';
+    $clientNonce = Str::random(32);
+
+    Cache::put("social_exchange_{$code}", [
+        'user_id' => $user->id,
+        'token' => 'token-123',
+        'client_nonce' => $clientNonce,
+    ], now()->addSeconds(60));
+
     $response = $this->postJson(route('google.exchange'), [
-        'code' => 'non-existent-code',
+        'code' => $code,
+        'client_nonce' => 'attacker-mismatched-nonce-value-12345',
     ]);
 
     $response->assertStatus(400)
         ->assertJson([
             'success' => false,
-            'message' => 'Invalid or expired exchange code.',
+            'message' => 'Client proof does not match initiating request.',
         ]);
 });

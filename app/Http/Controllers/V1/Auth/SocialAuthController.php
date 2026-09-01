@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Auth;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ExchangeSocialCodeRequest;
+use App\Http\Requests\RedirectToGoogleRequest;
 use App\Http\Resources\UserResource;
 use App\Services\Auth\SocialAuthService;
 use Exception;
@@ -19,10 +20,10 @@ class SocialAuthController extends Controller
         protected SocialAuthService $socialAuthService
     ) {}
 
-    public function redirectToGoogle(Request $request): JsonResponse
+    public function redirectToGoogle(RedirectToGoogleRequest $request): JsonResponse
     {
         try {
-            $url = $this->socialAuthService->getRedirectUrl('google', $request->query('client_nonce'));
+            $url = $this->socialAuthService->getRedirectUrl('google', $request->validated('client_nonce'));
 
             return ApiResponse::success(message: 'Redirect URL generated', data: ['url' => $url]);
         } catch (Exception $e) {
@@ -41,9 +42,9 @@ class SocialAuthController extends Controller
             );
 
             $code = $this->socialAuthService->createExchangeCode(
-                $result['user'],
-                $result['token'],
-                $result['client_nonce']
+                user: $result['user'],
+                token: $result['token'],
+                clientNonce: $result['client_nonce']
             );
             $frontendUrl = config('services.frontend.url');
 

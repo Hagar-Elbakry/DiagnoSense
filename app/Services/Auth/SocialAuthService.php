@@ -26,7 +26,7 @@ class SocialAuthService
         }
     }
 
-    public function getRedirectUrl(string $provider, ?string $clientNonce = null): string
+    public function getRedirectUrl(string $provider, string $clientNonce = null): string
     {
         $this->validateProvider($provider);
 
@@ -64,6 +64,10 @@ class SocialAuthService
         }
 
         $serverNonce = $decrypted['server_nonce'] ?? null;
+        $clientNonce = $decrypted['client_nonce'] ?? null;
+        if (! $clientNonce || ! is_string($clientNonce)) {
+            throw new Exception('OAuth state is missing required client proof.');
+        }
         if (! $serverNonce || ! Cache::add("used_oauth_nonce_{$serverNonce}", true, now()->addMinutes(15))) {
             throw new Exception('OAuth state has already been used.');
         }
@@ -143,7 +147,7 @@ class SocialAuthService
         });
     }
 
-    public function createExchangeCode(User $user, string $token, ?string $clientNonce = null): string
+    public function createExchangeCode(User $user, string $token, string $clientNonce = null): string
     {
         $code = Str::random(40);
 
@@ -156,7 +160,7 @@ class SocialAuthService
         return $code;
     }
 
-    public function exchangeCode(string $code, ?string $providedNonce = null): array
+    public function exchangeCode(string $code, string $providedNonce = null): array
     {
         $lock = Cache::lock("lock_exchange_{$code}", 5);
 
@@ -171,10 +175,9 @@ class SocialAuthService
                 throw new Exception('Invalid or expired exchange code.');
             }
 
-            if (isset($data['client_nonce']) && $data['client_nonce'] !== null) {
-                if (! $providedNonce || ! hash_equals($data['client_nonce'], $providedNonce)) {
-                    throw new Exception('Client proof does not match initiating request.');
-                }
+            $cachedNonce = $data['client_nonce'] ?? null;
+            if (! $cachedNonce || ! hash_equals($cachedNonce, $providedNonce)) {
+                throw new Exception('Client proof does not match initiating request.');
             }
 
             $user = User::with('doctor')->find($data['user_id']);
