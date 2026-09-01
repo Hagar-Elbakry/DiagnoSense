@@ -16,8 +16,16 @@ use Laravel\Socialite\Socialite;
 
 class SocialAuthService
 {
+    protected const SUPPORTED_PROVIDERS = ['google'];
+    protected function validateProvider(string $provider): void
+    {
+        if (! in_array($provider, self::SUPPORTED_PROVIDERS, true)) {
+            throw new Exception("Unsupported provider: {$provider}");
+        }
+    }
     public function getRedirectUrl(string $provider): string
     {
+        $this->validateProvider($provider);
         return Socialite::driver($provider)
             ->stateless()
             ->redirect()
@@ -26,6 +34,7 @@ class SocialAuthService
 
     public function handleProviderCallback(string $provider): array
     {
+        $this->validateProvider($provider);
         $socialUser = Socialite::driver($provider)
             ->stateless()
             ->user();
