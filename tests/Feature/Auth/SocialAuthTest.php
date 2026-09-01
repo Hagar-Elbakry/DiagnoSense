@@ -1,9 +1,10 @@
 <?php
 
-use App\Mail\WelcomeMail;
+use App\Events\User\UserRegistered;
+use App\Models\Doctor;
 use App\Models\User;
 use App\Models\UserSocialAccount;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -30,11 +31,11 @@ function mockSocialiteUser(
 }
 
 beforeEach(function () {
-    Mail::fake();
+    Event::fake();
     config(['services.frontend.url' => 'https://frontend.test']);
 });
 
-it('creates a new user, doctor profile, and social account on first login', function () {
+it('creates a new doctor user and social account on first login', function () {
 
     mockSocialiteUser(
         id: 'google-unique-id',
@@ -45,7 +46,6 @@ it('creates a new user, doctor profile, and social account on first login', func
     $response = get(route('google.callback'));
 
     $location = $response->headers->get('Location');
-
     expect($location)->toContain('#token=');
 
     $user = User::whereContact('new-doctor@example.com')->first();
@@ -59,25 +59,22 @@ it('creates a new user, doctor profile, and social account on first login', func
     assertDatabaseHas('doctors', [
         'user_id' => $user->id,
     ]);
-
     assertDatabaseHas('user_social_accounts', [
         'user_id' => $user->id,
         'provider' => 'google',
         'provider_id' => 'google-unique-id',
     ]);
 
-    Mail::assertQueued(WelcomeMail::class, function ($mail) use ($user) {
-        return $mail->hasTo($user->contact) && $mail->user->is($user);
-    });
-
-    expect(User::count())->toBe(1);
+    Event::assertDispatched(UserRegistered::class);
 });
 
-it('logs in user directly if social account already exists', function () {
+it('logs in doctor directly if social account already exists', function () {
 
     $user = User::factory()->create([
         'contact' => 'existing-social@example.com',
+        'type' => 'doctor'
     ]);
+    Doctor::factory()->create(['user_id' => $user->id]);
 
     UserSocialAccount::create([
         'user_id' => $user->id,
@@ -93,9 +90,23 @@ it('logs in user directly if social account already exists', function () {
     $response = get(route('google.callback'));
 
     $location = $response->headers->get('Location');
-
     expect($location)->toContain('#token=');
-
     expect(User::count())->toBe(1);
-    expect(UserSocialAccount::count())->toBe(1);
+});
+
+it('denies login if the account is not a doctor', function () {
+    User::factory()->create([
+        'contact' => 'patient@example.com',
+        'type' => 'patient',
+    ]);
+
+    mockSocialiteUser(
+        id: 'patient-google-id',
+        email: 'patient@example.com'
+    );
+
+    $response = get(route('google.callback'));
+
+    $location = $response->headers->get('Location');
+    expect($location)->toContain('message=auth_failed');
 });

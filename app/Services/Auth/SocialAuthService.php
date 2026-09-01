@@ -4,14 +4,12 @@ namespace App\Services\Auth;
 
 use App\Events\User\UserRegistered;
 use App\Helpers\Authentication;
-use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Models\UserSocialAccount;
 use Exception;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Socialite;
 
@@ -44,50 +42,52 @@ class SocialAuthService
                 ->first();
 
             if ($socialAccount) {
-                return [
-                    'user' => $socialAccount->user,
-                    'token' => Authentication::getToken($socialAccount->user),
-                ];
-            }
-
-            $user = User::where('contact', $email)->first();
-
-            if ($user) {
-                $existingProviderAccount = $user->socialAccounts()
-                    ->where('provider', $provider)
-                    ->first();
-
-                if ($existingProviderAccount && $existingProviderAccount->provider_id !== $providerId) {
-                    throw new Exception('Account already linked to a different '.$provider.' identity.');
-                }
-
-                $user->socialAccounts()->updateOrCreate(
-                    ['provider' => $provider],
-                    ['provider_id' => $providerId]
-                );
-
-                if (!$user->contact_verified_at) {
-                    $user->forceFill(['contact_verified_at' => now()])->save();
-                }
+                $user = $socialAccount->user;
             } else {
-                $user = User::create([
-                    'name' => $name,
-                    'contact' => $email,
-                    'password' => Hash::make(Str::random(32)),
-                    'type' => 'doctor',
-                    'is_active' => true,
-                    'contact_verified_at' => now(),
-                ]);
+                $user = User::where('contact', $email)->first();
 
-                $user->doctor()->create();
+                if ($user) {
+                    $existingProviderAccount = $user->socialAccounts()
+                        ->where('provider', $provider)
+                        ->first();
 
-                $user->socialAccounts()->create([
-                    'provider' => $provider,
-                    'provider_id' => $providerId,
-                ]);
+                    if ($existingProviderAccount && $existingProviderAccount->provider_id !== $providerId) {
+                        throw new Exception('Account already linked to a different '.$provider.' identity.');
+                    }
 
-                event(new UserRegistered($user));
+                    $user->socialAccounts()->updateOrCreate(
+                        ['provider' => $provider],
+                        ['provider_id' => $providerId]
+                    );
+
+                    if (!$user->contact_verified_at) {
+                        $user->forceFill(['contact_verified_at' => now()])->save();
+                    }
+                } else {
+                    $user = User::create([
+                        'name' => $name,
+                        'contact' => $email,
+                        'password' => Hash::make(Str::random(32)),
+                        'type' => 'doctor',
+                        'is_active' => true,
+                        'contact_verified_at' => now(),
+                    ]);
+
+                    $user->doctor()->create();
+
+                    $user->socialAccounts()->create([
+                        'provider' => $provider,
+                        'provider_id' => $providerId,
+                    ]);
+
+                    event(new UserRegistered($user));
+                }
             }
+
+            if ($user->type !== 'doctor') {
+                throw new Exception('Google login is only available for doctors.');
+            }
+
             return [
                 'user' => $user,
                 'token' => Authentication::getToken($user),
