@@ -34,10 +34,10 @@ class SocialAuthController extends Controller
         }
     }
 
-    public function handleGoogleCallback(): RedirectResponse
+    public function handleGoogleCallback(Request $request): RedirectResponse
     {
         try {
-            $result = $this->socialAuthService->handleProviderCallback('google');
+            $result = $this->socialAuthService->handleProviderCallback('google', $request->query('state'));
             $frontendUrl = config('services.frontend.url');
             $code = $this->socialAuthService->createExchangeCode($result['user'], $result['token']);
 

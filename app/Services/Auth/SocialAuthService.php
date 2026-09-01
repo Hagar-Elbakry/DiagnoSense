@@ -26,15 +26,24 @@ class SocialAuthService
     public function getRedirectUrl(string $provider): string
     {
         $this->validateProvider($provider);
+        $state = Str::random(40);
+        Cache::put("oauth_state_{$state}", true, now()->addMinutes(5));
+
         return Socialite::driver($provider)
             ->stateless()
+            ->with(['state' => $state])
             ->redirect()
             ->getTargetUrl();
     }
 
-    public function handleProviderCallback(string $provider): array
+    public function handleProviderCallback(string $provider,  ?string $state): array
     {
         $this->validateProvider($provider);
+
+        if (! $state || ! Cache::pull("oauth_state_{$state}")) {
+            throw new Exception('Invalid or expired OAuth state.');
+        }
+
         $socialUser = Socialite::driver($provider)
             ->stateless()
             ->user();
@@ -119,23 +128,30 @@ class SocialAuthService
 
     public function exchangeCode(string $code): array
     {
-        $data = Cache::pull("social_exchange_{$code}");
-
-        if (! $data) {
-            throw new Exception('Invalid or expired exchange code.');
+        $lock = Cache::lock("lock_exchange_{$code}", 5);
+        if (! $lock->get()) {
+            throw new Exception('Exchange code is currently being processed.');
         }
+        try{
+            $data = Cache::pull("social_exchange_{$code}");
+            if (! $data) {
+                throw new Exception('Invalid or expired exchange code.');
+            }
 
-        $user = User::with('doctor')->find($data['user_id']);
+            $user = User::with('doctor')->find($data['user_id']);
 
-        if (! $user) {
-            throw new Exception('User not found.');
+            if (! $user) {
+                throw new Exception('User not found.');
+            }
+
+            return [
+                'user' => $user,
+                'doctor_id' => $user->doctor->id ?? null,
+                'token' => $data['token'],
+            ];
+        } finally {
+            $lock->release();
         }
-
-        return [
-            'user' => $user,
-            'doctor_id' => $user->doctor->id ?? null,
-            'token' => $data['token'],
-        ];
     }
 
     protected function validateSocialPayload(string $provider, SocialiteUser $socialUser): void
