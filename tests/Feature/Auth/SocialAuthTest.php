@@ -13,13 +13,15 @@ use function Pest\Laravel\get;
 function mockSocialiteUser(
     string $id = '12345',
     string $email = 'doctor@example.com',
-    string $name = 'Dr. Tareq'
+    string $name = 'Dr. Tareq',
+    bool $emailVerified = true
 ): void {
     $socialUser = Mockery::mock(SocialiteUser::class);
     $socialUser->allows([
         'getId' => $id,
         'getEmail' => $email,
         'getName' => $name,
+        'getRaw' => ['email_verified' => $emailVerified],
     ]);
 
     Socialite::shouldReceive('driver->stateless->user')
