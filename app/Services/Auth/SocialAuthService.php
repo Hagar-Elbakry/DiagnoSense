@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Events\User\UserRegistered;
 use App\Helpers\Authentication;
 use App\Mail\WelcomeMail;
 use App\Models\User;
@@ -85,7 +86,7 @@ class SocialAuthService
                     'provider_id' => $providerId,
                 ]);
 
-                Mail::to($user->contact)->queue(new WelcomeMail($user));
+                event(new UserRegistered($user));
             }
             return [
                 'user' => $user,

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Events\ContactVerificationRequested;
 use App\Events\User\UserRegistered;
 use App\Mail\EmailVerificationMail;
 use App\Notifications\EmailVerificationSMSNotification;
@@ -10,12 +11,12 @@ use Illuminate\Support\Facades\Mail;
 
 class SendVerificationOtp implements ShouldQueue
 {
-    public function handle(UserRegistered $event): void
+    public function handle(ContactVerificationRequested $event): void
     {
         if (filter_var($event->user->contact, FILTER_VALIDATE_EMAIL)) {
-            Mail::to($event->user->contact)->send(new EmailVerificationMail($event->user, $event->otpCode));
+            Mail::to($event->user->contact)->send(new EmailVerificationMail($event->user, $event->otp));
         } else {
-            $event->user->notify(new EmailVerificationSMSNotification($event->otpCode));
+            $event->user->notify(new EmailVerificationSMSNotification($event->otp));
         }
 
     }
