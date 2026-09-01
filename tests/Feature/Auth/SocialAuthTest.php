@@ -35,6 +35,17 @@ beforeEach(function () {
     config(['services.frontend.url' => 'https://frontend.test']);
 });
 
+it('generates redirect url successfully', function () {
+    $response = get(route('google.redirect'));
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            'success',
+            'message',
+            'data' => ['url'],
+        ]);
+});
+
 it('creates a new doctor user and social account on first login', function () {
 
     mockSocialiteUser(
@@ -46,7 +57,7 @@ it('creates a new doctor user and social account on first login', function () {
     $response = get(route('google.callback'));
 
     $location = $response->headers->get('Location');
-    expect($location)->toContain('#token=');
+    expect($location)->toContain('https://frontend.test/auth/callback?code=');
 
     $user = User::whereContact('new-doctor@example.com')->first();
 
@@ -90,7 +101,7 @@ it('logs in doctor directly if social account already exists', function () {
     $response = get(route('google.callback'));
 
     $location = $response->headers->get('Location');
-    expect($location)->toContain('#token=');
+    expect($location)->toContain('https://frontend.test/auth/callback?code=');
     expect(User::count())->toBe(1);
 });
 
@@ -109,4 +120,48 @@ it('denies login if the account is not a doctor', function () {
 
     $location = $response->headers->get('Location');
     expect($location)->toContain('message=auth_failed');
+});
+
+it('successfully exchanges code for user data and auth token', function () {
+    $user = User::factory()->create(['type' => 'doctor']);
+    Doctor::factory()->create(['user_id' => $user->id]);
+
+    $token = 'dummy-sanctum-token-123';
+    $code = 'valid-test-exchange-code-456';
+
+    Cache::put("social_exchange_{$code}", [
+        'user_id' => $user->id,
+        'token' => $token,
+    ], now()->addSeconds(60));
+
+    $response = $this->postJson(route('google.exchange'), [
+        'code' => $code,
+    ]);
+    $response->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                'user' => [
+                    'id',
+                    'name',
+                    'contact' ,
+                    'type' ,
+                    'created_at',
+                    'updated_at',
+                ],
+                'doctor_id' ,
+                'token'
+            ],
+        ]);
+});
+
+it('fails to exchange an expired, invalid, or already-used code', function () {
+    $response = $this->postJson(route('google.exchange'), [
+        'code' => 'non-existent-or-expired-code',
+    ]);
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Invalid or expired exchange code.',
+        ]);
 });

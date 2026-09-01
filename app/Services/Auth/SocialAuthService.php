@@ -7,6 +7,7 @@ use App\Helpers\Authentication;
 use App\Models\User;
 use App\Models\UserSocialAccount;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -93,6 +94,39 @@ class SocialAuthService
                 'token' => Authentication::getToken($user),
             ];
         });
+    }
+
+    public function createExchangeCode(User $user, string $token): string
+    {
+        $code = Str::random(40);
+
+        Cache::put("social_exchange_{$code}", [
+            'user_id' => $user->id,
+            'token' => $token,
+        ], now()->addSeconds(60));
+
+        return $code;
+    }
+
+    public function exchangeCode(string $code): array
+    {
+        $data = Cache::pull("social_exchange_{$code}");
+
+        if (! $data) {
+            throw new Exception('Invalid or expired exchange code.');
+        }
+
+        $user = User::with('doctor')->find($data['user_id']);
+
+        if (! $user) {
+            throw new Exception('User not found.');
+        }
+
+        return [
+            'user' => $user,
+            'doctor_id' => $user->doctor->id ?? null,
+            'token' => $data['token'],
+        ];
     }
 
     protected function validateSocialPayload(string $provider, SocialiteUser $socialUser): void
