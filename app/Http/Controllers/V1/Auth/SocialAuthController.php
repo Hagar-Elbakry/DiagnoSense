@@ -19,10 +19,10 @@ class SocialAuthController extends Controller
         protected SocialAuthService $socialAuthService
     ) {}
 
-    public function redirectToGoogle(): JsonResponse
+    public function redirectToGoogle(Request $request): JsonResponse
     {
         try {
-            $url = $this->socialAuthService->getRedirectUrl('google');
+            $url = $this->socialAuthService->getRedirectUrl('google', $request->query('client_nonce'));
 
             return ApiResponse::success(message: 'Redirect URL generated', data: ['url' => $url]);
         } catch (Exception $e) {
@@ -40,7 +40,11 @@ class SocialAuthController extends Controller
                 state: $request->query('state')
             );
 
-            $code = $this->socialAuthService->createExchangeCode($result['user'], $result['token']);
+            $code = $this->socialAuthService->createExchangeCode(
+                $result['user'],
+                $result['token'],
+                $result['client_nonce']
+            );
             $frontendUrl = config('services.frontend.url');
 
             return redirect()->to("{$frontendUrl}/auth/callback?code={$code}");
@@ -58,7 +62,10 @@ class SocialAuthController extends Controller
     public function exchangeSocialCode(ExchangeSocialCodeRequest $request): JsonResponse
     {
         try {
-            $result = $this->socialAuthService->exchangeCode($request->validated('code'));
+            $result = $this->socialAuthService->exchangeCode(
+                code: $request->validated('code'),
+                providedNonce: $request->input('client_nonce')
+            );
 
             return ApiResponse::success(
                 message: 'Authenticated successfully',

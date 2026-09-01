@@ -10,6 +10,7 @@ class ExchangeSocialCodeRequest extends FormRequest
     {
         return [
             'code' => ['required', 'string'],
+            'client_nonce' => ['nullable', 'string'],
         ];
     }
 }

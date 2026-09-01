@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
-use Symfony\Component\HttpFoundation\Cookie as HttpCookie;
 
 class SocialAuthService
 {
@@ -27,12 +26,13 @@ class SocialAuthService
         }
     }
 
-    public function getRedirectUrl(string $provider): string
+    public function getRedirectUrl(string $provider, ?string $clientNonce = null): string
     {
         $this->validateProvider($provider);
 
         $statePayload = json_encode([
-            'nonce' => Str::random(32),
+            'server_nonce' => Str::random(32),
+            'client_nonce' => $clientNonce,
             'expires_at' => now()->addMinutes(10)->timestamp,
         ]);
 
@@ -63,8 +63,8 @@ class SocialAuthService
             throw new Exception('OAuth state has expired.');
         }
 
-        $nonce = $decrypted['nonce'] ?? null;
-        if (! $nonce || ! Cache::add("used_oauth_nonce_{$nonce}", true, now()->addMinutes(15))) {
+        $serverNonce = $decrypted['server_nonce'] ?? null;
+        if (! $serverNonce || ! Cache::add("used_oauth_nonce_{$serverNonce}", true, now()->addMinutes(15))) {
             throw new Exception('OAuth state has already been used.');
         }
 
@@ -138,23 +138,25 @@ class SocialAuthService
             return [
                 'user' => $user,
                 'token' => Authentication::getToken($user),
+                'client_nonce' => $decrypted['client_nonce'] ?? null,
             ];
         });
     }
 
-    public function createExchangeCode(User $user, string $token): string
+    public function createExchangeCode(User $user, string $token, ?string $clientNonce = null): string
     {
         $code = Str::random(40);
 
         Cache::put("social_exchange_{$code}", [
             'user_id' => $user->id,
             'token' => $token,
+            'client_nonce' => $clientNonce,
         ], now()->addSeconds(60));
 
         return $code;
     }
 
-    public function exchangeCode(string $code): array
+    public function exchangeCode(string $code, ?string $providedNonce = null): array
     {
         $lock = Cache::lock("lock_exchange_{$code}", 5);
 
@@ -167,6 +169,12 @@ class SocialAuthService
 
             if (! $data) {
                 throw new Exception('Invalid or expired exchange code.');
+            }
+
+            if (isset($data['client_nonce']) && $data['client_nonce'] !== null) {
+                if (! $providedNonce || ! hash_equals($data['client_nonce'], $providedNonce)) {
+                    throw new Exception('Client proof does not match initiating request.');
+                }
             }
 
             $user = User::with('doctor')->find($data['user_id']);

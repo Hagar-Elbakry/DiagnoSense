@@ -10,10 +10,11 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
-function generateValidEncryptedState(): string
+function generateValidEncryptedState(?string $clientNonce = null): string
 {
     return Crypt::encryptString(json_encode([
-        'nonce' => Str::random(32),
+        'server_nonce' => Str::random(32),
+        'client_nonce' => $clientNonce,
         'expires_at' => now()->addMinutes(10)->timestamp,
     ]));
 }
@@ -31,9 +32,11 @@ function mockSocialiteUser(
         'getRaw' => ['email_verified' => $emailVerified],
     ]);
 
-    Socialite::shouldReceive('driver->stateless->user')
-        ->once()
-        ->andReturn($socialUser);
+    $providerMock = Mockery::mock();
+    $providerMock->shouldReceive('stateless')->andReturnSelf();
+    $providerMock->shouldReceive('user')->andReturn($socialUser);
+
+    Socialite::shouldReceive('driver')->with('google')->andReturn($providerMock);
 }
 
 beforeEach(function () {
@@ -42,7 +45,7 @@ beforeEach(function () {
 });
 
 it('generates redirect url successfully', function () {
-    $response = $this->getJson(route('google.redirect'));
+    $response = $this->getJson(route('google.redirect', ['client_nonce' => 'test-nonce-123']));
 
     $response->assertOk()
         ->assertJsonStructure([
@@ -53,7 +56,7 @@ it('generates redirect url successfully', function () {
 });
 
 it('creates a new doctor user and redirects with an exchange code', function () {
-    $validState = generateValidEncryptedState();
+    $validState = generateValidEncryptedState('client-test-nonce');
 
     mockSocialiteUser(
         id: 'google-unique-id',
@@ -89,7 +92,7 @@ it('logs in doctor directly if social account already exists without dispatching
     $validState = generateValidEncryptedState();
 
     $user = User::factory()->create([
-        'contact' => 'existing-social@example.com',
+        'contact' => 'existing-social@example.com'
     ]);
     Doctor::factory()->create(['user_id' => $user->id]);
 
