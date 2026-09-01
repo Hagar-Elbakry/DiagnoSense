@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ContactVerificationRequested;
 use App\Events\User\UserRegistered;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
@@ -44,6 +45,10 @@ it('allows a doctor to register successfully with valid email or phone', functio
     $response->assertJsonMissingPath('data.user.password_confirmation');
 
     Event::assertDispatched(UserRegistered::class, function ($event) use ($contact) {
+        return $event->user->contact === $contact;
+    });
+
+    Event::assertDispatched(ContactVerificationRequested::class, function ($event) use ($contact) {
         return $event->user->contact === $contact;
     });
 

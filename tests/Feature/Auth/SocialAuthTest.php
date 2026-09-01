@@ -1,38 +1,71 @@
 <?php
 
-use App\Mail\WelcomeMail;
+use App\Events\User\UserRegistered;
+use App\Models\Doctor;
 use App\Models\User;
 use App\Models\UserSocialAccount;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\get;
-
+function generateValidEncryptedState(string $clientNonce, ?int $expiresAt = null): string
+{
+    return Crypt::encryptString(json_encode([
+        'server_nonce' => Str::random(32),
+        'client_nonce' => $clientNonce,
+        'expires_at' => $expiresAt ?? now()->addMinutes(10)->timestamp,
+    ]));
+}
 function mockSocialiteUser(
     string $id = '12345',
     string $email = 'doctor@example.com',
-    string $name = 'Dr. Tareq'
+    string $name = 'Dr. Tareq',
+    bool $emailVerified = true
 ): void {
     $socialUser = Mockery::mock(SocialiteUser::class);
     $socialUser->allows([
         'getId' => $id,
         'getEmail' => $email,
         'getName' => $name,
+        'getRaw' => ['email_verified' => $emailVerified],
     ]);
 
-    Socialite::shouldReceive('driver->stateless->user')
-        ->once()
-        ->andReturn($socialUser);
+    $providerMock = Mockery::mock();
+    $providerMock->shouldReceive('stateless')->andReturnSelf();
+    $providerMock->shouldReceive('user')->andReturn($socialUser);
+
+    Socialite::shouldReceive('driver')->with('google')->andReturn($providerMock);
 }
 
 beforeEach(function () {
-    Mail::fake();
+    Event::fake();
     config(['services.frontend.url' => 'https://frontend.test']);
 });
 
-it('creates a new user, doctor profile, and social account on first login', function () {
+it('fails redirect generation when client_nonce is missing or invalid', function () {
+    $this->getJson(route('google.redirect'))
+        ->assertStatus(422);
+
+    $this->getJson(route('google.redirect', ['client_nonce' => 'short']))
+        ->assertStatus(422);
+});
+
+it('generates redirect url successfully with a valid client_nonce', function () {
+    $response = $this->getJson(route('google.redirect', ['client_nonce' => Str::random(32)]));
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            'success',
+            'message',
+            'data' => ['url'],
+        ]);
+});
+
+it('creates a new doctor user and redirects with an exchange code', function () {
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
 
     mockSocialiteUser(
         id: 'google-unique-id',
@@ -40,11 +73,11 @@ it('creates a new user, doctor profile, and social account on first login', func
         name: 'Menna Baligh'
     );
 
-    $response = get(route('google.callback'));
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
 
+    $response->assertRedirect();
     $location = $response->headers->get('Location');
-
-    expect($location)->toContain('#token=');
+    expect($location)->toContain('https://frontend.test/auth/callback?code=');
 
     $user = User::whereContact('new-doctor@example.com')->first();
 
@@ -54,28 +87,24 @@ it('creates a new user, doctor profile, and social account on first login', func
         ->type->toBe('doctor')
         ->doctor->not->toBeNull();
 
-    assertDatabaseHas('doctors', [
-        'user_id' => $user->id,
-    ]);
-
-    assertDatabaseHas('user_social_accounts', [
+    $this->assertDatabaseHas('doctors', ['user_id' => $user->id]);
+    $this->assertDatabaseHas('user_social_accounts', [
         'user_id' => $user->id,
         'provider' => 'google',
         'provider_id' => 'google-unique-id',
     ]);
 
-    Mail::assertQueued(WelcomeMail::class, function ($mail) use ($user) {
-        return $mail->hasTo($user->contact) && $mail->user->is($user);
-    });
-
-    expect(User::count())->toBe(1);
+    Event::assertDispatched(UserRegistered::class);
 });
 
-it('logs in user directly if social account already exists', function () {
+it('logs in doctor directly if social account already exists without dispatching registration event', function () {
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
 
     $user = User::factory()->create([
         'contact' => 'existing-social@example.com',
     ]);
+    Doctor::factory()->create(['user_id' => $user->id]);
 
     UserSocialAccount::create([
         'user_id' => $user->id,
@@ -88,12 +117,104 @@ it('logs in user directly if social account already exists', function () {
         email: 'existing-social@example.com'
     );
 
-    $response = get(route('google.callback'));
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
 
+    $response->assertRedirect();
     $location = $response->headers->get('Location');
-
-    expect($location)->toContain('#token=');
+    expect($location)->toContain('https://frontend.test/auth/callback?code=');
 
     expect(User::count())->toBe(1);
-    expect(UserSocialAccount::count())->toBe(1);
+    Event::assertNotDispatched(UserRegistered::class);
+});
+
+it('denies login if the account is not a doctor', function () {
+    $clientNonce = Str::random(32);
+    $validState = generateValidEncryptedState($clientNonce);
+
+    User::factory()->create([
+        'contact' => 'patient@example.com',
+        'type' => 'patient',
+    ]);
+
+    mockSocialiteUser(
+        id: 'patient-google-id',
+        email: 'patient@example.com'
+    );
+
+    $response = $this->getJson(route('google.callback', ['state' => $validState]));
+
+    $location = $response->headers->get('Location');
+    expect($location)->toContain('message=auth_failed');
+});
+
+it('fails and redirects to auth_failed if state is missing or invalid', function () {
+    $response = $this->getJson(route('google.callback'));
+    expect($response->headers->get('Location'))->toContain('message=auth_failed');
+
+    $invalidResponse = $this->getJson(route('google.callback', ['state' => 'forged-state-string']));
+    expect($invalidResponse->headers->get('Location'))->toContain('message=auth_failed');
+});
+
+it('successfully exchanges code with matching client_nonce for  doctor', function () {
+    $user = User::factory()->create([
+        'is_active' => true,
+    ]);
+    Doctor::factory()->create(['user_id' => $user->id]);
+
+    $token = 'dummy-sanctum-token-123';
+    $code = 'valid-test-exchange-code-456';
+    $clientNonce = Str::random(32);
+
+    Cache::put("social_exchange_{$code}", [
+        'user_id' => $user->id,
+        'token' => $token,
+        'client_nonce' => $clientNonce,
+    ], now()->addSeconds(60));
+
+    $response = $this->postJson(route('google.exchange'), [
+        'code' => $code,
+        'client_nonce' => $clientNonce,
+    ]);
+    $response->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                'user' => [
+                    'id',
+                    'name',
+                    'contact',
+                    'type',
+                    'created_at',
+                    'updated_at',
+                ],
+                'doctor_id',
+                'token',
+            ],
+        ]);
+});
+
+it('denies exchange if client_nonce does not match', function () {
+    $user = User::factory()->create([
+        'is_active' => true,
+    ]);
+    Doctor::factory()->create(['user_id' => $user->id]);
+
+    $code = 'valid-exchange-code';
+    $clientNonce = Str::random(32);
+
+    Cache::put("social_exchange_{$code}", [
+        'user_id' => $user->id,
+        'token' => 'token-123',
+        'client_nonce' => $clientNonce,
+    ], now()->addSeconds(60));
+
+    $response = $this->postJson(route('google.exchange'), [
+        'code' => $code,
+        'client_nonce' => 'attacker-mismatched-nonce-value-12345',
+    ]);
+
+    $response->assertStatus(400)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Client proof does not match initiating request.',
+        ]);
 });

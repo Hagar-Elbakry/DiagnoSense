@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Events\ContactVerificationRequested;
 use App\Events\User\UserRegistered;
 use App\Helpers\Authentication;
 use App\Models\User;
@@ -26,7 +27,8 @@ class RegisterDoctorAction
             $token = Authentication::getToken($user);
             $otpCode = Authentication::generateOtp($user->contact, $this->otp);
 
-            UserRegistered::dispatch($user, $otpCode);
+            event(new UserRegistered($user));
+            event(new ContactVerificationRequested($user, $otpCode));
 
             return [
                 'user' => $user,
