@@ -309,3 +309,10 @@ php artisan test
 ```
 
 The GitHub Actions workflows run the test suite and Pint checks on pushes and pull requests.
+
+## Demo
+
+
+
+https://github.com/user-attachments/assets/7484ac15-1833-4ff2-8b16-4798c7de2c08
+
