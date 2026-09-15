@@ -39,7 +39,6 @@ Route::prefix('v1')->group(function () {
         Route::middleware('check-user-type')->group(function () {
             Route::controller(AuthenticationController::class)->group(function () {
                 Route::post('/login/{type}', 'login')->name('auth.login')->middleware('throttle:login');
-                Route::post('/logout/{type}', 'logout')->name('auth.logout')->middleware('auth:sanctum');
             });
 
             Route::controller(PasswordController::class)->as('password.')->group(function () {
@@ -48,6 +47,10 @@ Route::prefix('v1')->group(function () {
                 Route::post('/reset-password/{type}', 'resetPassword')->name('reset')->middleware(['auth:sanctum', 'abilities:reset-password']);
             });
         });
+
+        Route::post('/logout', [AuthenticationController::class, 'logout'])
+            ->name('auth.logout')
+            ->middleware('auth:sanctum');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::controller(ContactVerificationController::class)->group(function () {

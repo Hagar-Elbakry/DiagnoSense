@@ -12,6 +12,7 @@ use App\Http\Resources\UserResource;
 use App\Services\Auth\AuthenticationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class AuthenticationController extends Controller
@@ -59,11 +60,10 @@ class AuthenticationController extends Controller
         }
     }
 
-    public function logout(LogoutRequest $request): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
         try {
-            $user = $request->user();
-            $this->authenticationService->logout($user);
+            $this->authenticationService->logout( $request->user());
 
             return ApiResponse::success(message: 'Logout successful');
         } catch (Exception $e) {

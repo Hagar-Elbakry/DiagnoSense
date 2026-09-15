@@ -130,13 +130,17 @@ it('allow user to logout', function (string $userType) {
         $response = $this->postJson(route('auth.login', $userType), $data);
         $token = $response->json('data.token');
         $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson(route('auth.logout', $userType))
-            ->assertStatus(200);
+            ->postJson(route('auth.logout'))
+            ->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Logout successful',
+            ]);
 
         auth()->forgetGuards();
 
         $response2 = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson(route('auth.logout', $userType));
+            ->postJson(route('auth.logout'));
         $response2->assertStatus(401);
     }
 })->with('user_types');
