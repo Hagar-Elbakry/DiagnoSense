@@ -98,6 +98,32 @@ it('fails to login if user account is deactivated', function (string $userType) 
         ]);
 })->with('user_types');
 
+it('fails login if user credentials match but route type is mismatched', function () {
+    $doctor = createUserWithType('doctor', 'doctor.mismatch@gmail.com');
+    $response = $this->postJson(route('login', 'patient'), [
+        'contact' => 'doctor.mismatch@gmail.com',
+        'password' => 'password',
+    ]);
+
+    $response->assertStatus(401)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Invalid credentials',
+        ]);
+});
+
+it('rejects login request with invalid user type parameter in route', function () {
+    $response = $this->postJson(route('login', 'admin'), [
+        'contact' => 'test@admin.com',
+        'password' => 'password',
+    ]);
+    $response->assertStatus(400)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Invalid user type.',
+        ]);
+});
+
 it('allow user to logout', function (string $userType) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
