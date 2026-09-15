@@ -46,7 +46,7 @@ dataset('invalid_data', [
 it('allow user to login', function (string $userType) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
-        $response = $this->postJson(route('login', $userType), $data);
+        $response = $this->postJson(route('auth.login', $userType), $data);
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'success',
@@ -62,7 +62,7 @@ it('allow user to login', function (string $userType) {
 it('fails login user with invalid credentials', function (string $userType, array $invalidCredentials) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
-        $response = $this->postJson(route('login', $userType), array_merge($data, $invalidCredentials));
+        $response = $this->postJson(route('auth.login', $userType), array_merge($data, $invalidCredentials));
         $response->assertStatus(401);
         $response->assertJson([
             'success' => false,
@@ -74,7 +74,7 @@ it('fails login user with invalid credentials', function (string $userType, arra
 it('fails login user with invalid data', function (string $userType, array $invalidData, array $expectedErrors) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
-        $response = $this->postJson(route('login', $userType), array_merge($data, $invalidData));
+        $response = $this->postJson(route('auth.login', $userType), array_merge($data, $invalidData));
         $response->assertStatus(422);
         $response->assertJson([
             'success' => false,
@@ -87,7 +87,7 @@ it('fails login user with invalid data', function (string $userType, array $inva
 it('fails to login if user account is deactivated', function (string $userType) {
     $user = createUserWithType(type: $userType, contact: 'inactive@test.com', isActive: false);
 
-    $response = $this->postJson(route('login', $userType), [
+    $response = $this->postJson(route('auth.login', $userType), [
         'contact' => 'inactive@test.com',
         'password' => 'password',
     ]);
@@ -100,7 +100,7 @@ it('fails to login if user account is deactivated', function (string $userType) 
 
 it('fails login if user credentials match but route type is mismatched', function () {
     $doctor = createUserWithType('doctor', 'doctor.mismatch@gmail.com');
-    $response = $this->postJson(route('login', 'patient'), [
+    $response = $this->postJson(route('auth.login', 'patient'), [
         'contact' => 'doctor.mismatch@gmail.com',
         'password' => 'password',
     ]);
@@ -113,7 +113,7 @@ it('fails login if user credentials match but route type is mismatched', functio
 });
 
 it('rejects login request with invalid user type parameter in route', function () {
-    $response = $this->postJson(route('login', 'admin'), [
+    $response = $this->postJson(route('auth.login', 'admin'), [
         'contact' => 'test@admin.com',
         'password' => 'password',
     ]);
@@ -127,16 +127,16 @@ it('rejects login request with invalid user type parameter in route', function (
 it('allow user to logout', function (string $userType) {
     $dataSet = getDataSets($userType, $this);
     foreach ($dataSet as $data) {
-        $response = $this->postJson(route('login', $userType), $data);
+        $response = $this->postJson(route('auth.login', $userType), $data);
         $token = $response->json('data.token');
         $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson(route('logout', $userType))
+            ->postJson(route('auth.logout', $userType))
             ->assertStatus(200);
 
         auth()->forgetGuards();
 
         $response2 = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson(route('logout', $userType));
+            ->postJson(route('auth.logout', $userType));
         $response2->assertStatus(401);
     }
 })->with('user_types');

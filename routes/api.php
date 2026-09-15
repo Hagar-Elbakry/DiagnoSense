@@ -38,8 +38,8 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('check-user-type')->group(function () {
             Route::controller(AuthenticationController::class)->group(function () {
-                Route::post('/login/{type}', 'login')->name('login')->middleware('throttle:login');
-                Route::post('/logout/{type}', 'logout')->name('logout')->middleware('auth:sanctum');
+                Route::post('/login/{type}', 'login')->name('auth.login')->middleware('throttle:login');
+                Route::post('/logout/{type}', 'logout')->name('auth.logout')->middleware('auth:sanctum');
             });
 
             Route::controller(PasswordController::class)->as('password.')->group(function () {
