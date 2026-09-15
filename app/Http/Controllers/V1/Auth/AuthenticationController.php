@@ -6,7 +6,6 @@ use App\Actions\RegisterDoctorAction;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\RegistrationRequest;
 use App\Http\Resources\UserResource;
 use App\Services\Auth\AuthenticationService;
@@ -63,7 +62,7 @@ class AuthenticationController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $this->authenticationService->logout( $request->user());
+            $this->authenticationService->logout($request->user());
 
             return ApiResponse::success(message: 'Logout successful');
         } catch (Exception $e) {
