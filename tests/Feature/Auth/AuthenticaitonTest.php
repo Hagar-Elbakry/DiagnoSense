@@ -1,10 +1,10 @@
 <?php
 
 beforeEach(function () {
-    $doctorWithEmail = createUserWithType('doctor', 'testDoctor@gmail.com');
-    $patientWithEmail = createUserWithType('patient', 'testPatient@gmail.com');
-    $doctorWithPhone = createUserWithType('doctor', '01012345678');
-    $patientWithPhone = createUserWithType('patient', '01012345679');
+    $doctorWithEmail = createUserWithType(type: 'doctor', contact: 'testDoctor@gmail.com');
+    $patientWithEmail = createUserWithType(type: 'patient', contact: 'testPatient@gmail.com');
+    $doctorWithPhone = createUserWithType(type: 'doctor', contact: '01012345678');
+    $patientWithPhone = createUserWithType(type: 'patient', contact: '01012345679');
 
     $this->validData = [
         'doctor' => [
@@ -83,6 +83,20 @@ it('fails login user with invalid data', function (string $userType, array $inva
         ]);
     }
 })->with('user_types', 'invalid_data');
+
+it('fails to login if user account is deactivated', function (string $userType) {
+    $user = createUserWithType(type: $userType, contact: 'inactive@test.com', isActive: false);
+
+    $response = $this->postJson(route('login', $userType), [
+        'contact' => 'inactive@test.com',
+        'password' => 'password',
+    ]);
+    $response->assertStatus(401)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Invalid credentials',
+        ]);
+})->with('user_types');
 
 it('allow user to logout', function (string $userType) {
     $dataSet = getDataSets($userType, $this);

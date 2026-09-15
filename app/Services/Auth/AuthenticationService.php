@@ -101,7 +101,7 @@ class AuthenticationService
     private function authenticate(string $contact, string $password): ?User
     {
         $user = $this->getUser($contact);
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($password, $user->password ) || !$user->is_active) {
             return null;
         }
 

@@ -53,12 +53,13 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function createUserWithType(string $type, string $contact, ?string $name = null): User
+function createUserWithType(string $type, string $contact, ?string $name = null, ?bool $isActive = true): User
 {
     $user = User::factory()->create([
         'type' => $type,
         'contact' => $contact,
         'name' => $name ?? fake()->name(),
+        'is_active' => $isActive,
     ]);
 
     if ($type === 'doctor') {
